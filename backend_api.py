@@ -351,8 +351,8 @@ async def startup_event():
         db.add_post(post)
     
     print(f"\n✓ Demo data loaded: {len(demo_posts)} posts")
-    print(f"✓ API ready at http://localhost:8000")
-    print(f"✓ Docs available at http://localhost:8000/docs\n")
+    print(f"✓ API ready at http://localhost:8320")
+    print(f"✓ Docs available at http://localhost:8320/docs\n")
 
 
 if __name__ == "__main__":
@@ -363,9 +363,9 @@ if __name__ == "__main__":
     ╚════════════════════════════════════════════════════════════╝
     
     Starting server...
-    - API: http://localhost:8000
-    - Docs: http://localhost:8000/docs
-    - Frontend should connect to: http://localhost:8000/api
+    - API: http://localhost:8320
+    - Docs: http://localhost:8320/docs
+    - Frontend should connect to: http://localhost:8320/api
     """)
     
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8320)
