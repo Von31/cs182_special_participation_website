@@ -19,6 +19,8 @@
             background: #003262;
             min-height: 100vh;
             padding: 20px;
+            font-size: 16px;
+            color: #212529;
         }
 
         .container {
@@ -63,9 +65,10 @@
         }
 
         .form-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-weight: 700;
+            margin-bottom: 10px;
             color: #003262;
+            font-size: 16px;
         }
 
         .dropdown-container {
@@ -73,17 +76,19 @@
         }
 
         .dropdown-display {
-            padding: 12px;
+            padding: 14px;
             border: 2px solid #dee2e6;
             border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Noto Serif', serif;
+            font-size: 16px;
+            font-family: 'Source Sans Pro', sans-serif;
             background: white;
             cursor: pointer;
-            min-height: 45px;
+            min-height: 50px;
             display: flex;
             align-items: center;
             transition: border-color 0.3s;
+            color: #212529;
+            font-weight: 500;
         }
 
         .dropdown-display:hover,
@@ -92,7 +97,8 @@
         }
 
         .dropdown-placeholder {
-            color: #6c757d;
+            color: #868e96;
+            font-weight: 400;
         }
 
         .dropdown-menu {
@@ -133,7 +139,7 @@
             border: 1px solid #dee2e6;
             border-radius: 4px;
             font-size: 14px;
-            font-family: 'Noto Serif', serif;
+            font-family: 'Source Sans Pro', sans-serif;
             color: #495057;
         }
 
@@ -157,7 +163,7 @@
             border-radius: 4px;
             font-size: 12px;
             font-weight: 600;
-            font-family: 'Noto Serif', serif;
+            font-family: 'Source Sans Pro', sans-serif;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -269,7 +275,7 @@
             border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
-            font-family: 'Noto Serif', serif;
+            font-family: 'Source Sans Pro', sans-serif;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -287,7 +293,7 @@
             border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
-            font-family: 'Noto Serif', serif;
+            font-family: 'Source Sans Pro', sans-serif;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -311,7 +317,7 @@
             border: none;
             font-size: 16px;
             font-weight: 600;
-            font-family: 'Noto Serif', serif;
+            font-family: 'Source Sans Pro', sans-serif;
             color: #6c757d;
             cursor: pointer;
             transition: all 0.3s;
@@ -386,7 +392,9 @@
 
         .placeholder {
             text-align: center;
-            color: #6c757d;
+            color: #495057;
+            font-size: 16px;
+            font-weight: 500;
         }
 
         .filter-note {
@@ -459,22 +467,25 @@
         .post-card {
             background: white;
             border: 2px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.12);
             transition: all 0.3s;
             cursor: pointer;
         }
 
         .post-card:hover {
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+            transform: translateY(-3px);
+            border-color: #003262;
         }
 
         .post-card h3 {
             color: #003262;
-            margin-bottom: 12px;
-            font-size: 18px;
+            margin-bottom: 16px;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.4;
         }
 
         .post-meta {
@@ -482,20 +493,21 @@
             flex-direction: row;
             align-items: center;
             gap: 15px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             flex-wrap: wrap;
         }
 
         .post-author {
-            color: #6c757d;
-            font-size: 14px;
+            color: #212529;
+            font-size: 16px;
+            font-weight: 600;
         }
 
         .participation-badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
             color: #003262;
         }
 
@@ -520,9 +532,10 @@
         }
 
         .post-excerpt {
-            color: #495057;
-            line-height: 1.6;
-            font-size: 14px;
+            color: #212529;
+            line-height: 1.7;
+            font-size: 16px;
+            margin-bottom: 12px;
         }
 
         @media (max-width: 768px) {
@@ -591,7 +604,7 @@
                     <label>Author Name</label>
                     <div class="dropdown-container">
                         <div class="dropdown-display" onclick="toggleDropdown('studentDropdown')">
-                            <span class="dropdown-placeholder" id="studentDisplay">Select students...</span>
+                            <span class="dropdown-placeholder" id="studentDisplay">Select author name...</span>
                         </div>
                         <div class="dropdown-menu" id="studentDropdown">
                             <div class="dropdown-controls">
@@ -603,7 +616,7 @@
                             </div>
                             <div id="studentDropdownItems" class="loading">
                                 <div class="loading-spinner"></div>
-                                <p style="margin-top: 10px;">Loading students...</p>
+                                <p style="margin-top: 10px;">Loading authors...</p>
                             </div>
                             <div class="dropdown-item">
                             </div>
@@ -972,7 +985,7 @@
         <div class="content">
             <div id="postsTab" class="tab-content active">
                 <div class="filter-note">
-                    Select participation type, students, homework assignments, and LLM agents above, then click Search to view posts
+                    Select participation type, author name, homework assignments, and LLM agents above, then click Search to view posts
                 </div>
 
                 <h3 style="margin-bottom: 20px; color: #003262;">Posts</h3>
@@ -986,7 +999,7 @@
                     <div class="summary-card">
                         <h3>Executive Summary</h3>
                         <div class="summary-text" id="summaryText">
-                            <p class="placeholder">Select a student, homework, and LLM agent to view the executive summary.</p>
+                            <p class="placeholder">Select participation type,  author name, homework assignment, and LLM agent to view the executive summary.</p>
                         </div>
                     </div>
                     <div class="pdf-viewer" id="pdfViewer">
@@ -1003,7 +1016,7 @@
 
             <div id="wordcloudTab" class="tab-content">
                 <div class="filter-note">
-                    Select participation type, students, homework assignments, and LLM agents above, then click Search to generate word cloud and sentiment analysis
+                    Select participation type, author name, homework assignment, and LLM agent above, then click Search to generate word cloud and sentiment analysis
                 </div>
 
                 <h3 style="margin-bottom: 20px; color: #003262;">Word Cloud</h3>
@@ -1066,10 +1079,38 @@
                 if (!response.ok) throw new Error('Failed to fetch LLMs');
                 const data = await response.json();
                 llmsData = data;
-                populateLLMDropdown(data);
+                if (data && data.length > 0) {
+                    populateLLMDropdown(data);
+                } else {
+                    console.warn('API returned empty LLMs array, trying posts data...');
+                    // Try to get from posts if API returns empty
+                    const posts = await fetch(`${API_BASE_URL}/posts`);
+                    if (posts.ok) {
+                        const postsData = await posts.json();
+                        if (postsData && postsData.length > 0) {
+                            await populateDropdownsFromPosts();
+                            return;
+                        }
+                    }
+                }
                 return data;
             } catch (error) {
-                console.error('Error fetching LLMs:', error);
+                console.error('Error fetching LLMs from API:', error);
+                // Don't show error immediately - try to get from posts first
+                console.log('Trying to populate LLMs from posts data...');
+                try {
+                    const posts = await fetch(`${API_BASE_URL}/posts`);
+                    if (posts.ok) {
+                        const postsData = await posts.json();
+                        if (postsData && postsData.length > 0) {
+                            await populateDropdownsFromPosts();
+                            return [];
+                        }
+                    }
+                } catch (postsError) {
+                    console.error('Error fetching posts:', postsError);
+                }
+                // Only show error if both methods failed
                 showError('llmDropdownItems', 'Failed to load LLM agents. Please check your API connection.');
                 return [];
             }
@@ -1077,8 +1118,14 @@
 
         async function fetchSubmission(student, homework, llm) {
             try {
-                const response = await fetch(`${API_BASE_URL}/submissions?student=${encodeURIComponent(student)}&homework=${homework}&llm=${encodeURIComponent(llm)}`);
-                if (!response.ok) throw new Error('Failed to fetch submission');
+                // Ensure homework is converted to string for the API
+                const homeworkStr = String(homework);
+                const response = await fetch(`${API_BASE_URL}/submissions?student=${encodeURIComponent(student)}&homework=${encodeURIComponent(homeworkStr)}&llm=${encodeURIComponent(llm)}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Failed to fetch submission:', response.status, errorText);
+                    throw new Error(`Failed to fetch submission: ${response.status}`);
+                }
                 const data = await response.json();
                 return data;
             } catch (error) {
@@ -1166,6 +1213,9 @@
                 } else if (hw.number === 'unknown' || hw.number === 'Unknown') {
                     displayText = 'unknown';
                     safeId = 'hw_unknown';
+                } else if (hw.number === 0 || hw.number === '0') {
+                    displayText = 'Homework 0';
+                    safeId = 'hw_0';
                 } else {
                     displayText = `Homework ${hw.number}`;
                     safeId = `hw_${hw.number}`;
@@ -1180,21 +1230,96 @@
 
         function populateLLMDropdown(llms) {
             const container = document.getElementById('llmDropdownItems');
-            if (!container) return;
+            if (!container) {
+                console.error('LLM dropdown container not found');
+                return;
+            }
+            
+            console.log('populateLLMDropdown called with:', llms);
+            console.log('Type of llms:', typeof llms, 'Is array:', Array.isArray(llms));
+            
+            // Handle empty or invalid input
+            if (!llms) {
+                console.warn('No LLMs provided (null/undefined)');
+                container.innerHTML = '<div class="dropdown-item"><p style="padding: 10px; color: #6c757d;">No LLM agents available</p></div>';
+                return;
+            }
+            
+            if (!Array.isArray(llms)) {
+                console.warn('LLMs is not an array:', llms);
+                container.innerHTML = '<div class="dropdown-item"><p style="padding: 10px; color: #6c757d;">Invalid LLM data format</p></div>';
+                return;
+            }
+            
+            if (llms.length === 0) {
+                console.warn('Empty LLMs array');
+                container.innerHTML = '<div class="dropdown-item"><p style="padding: 10px; color: #6c757d;">No LLM agents available</p></div>';
+                return;
+            }
+            
+            // Preserve currently selected values before clearing
+            const currentlySelected = getSelectedValues('llm');
+            console.log('Preserving selected LLMs:', currentlySelected);
             
             container.innerHTML = '';
+            
+            let itemsAdded = 0;
             llms.forEach((llm, index) => {
-                const item = document.createElement('div');
-                item.className = 'dropdown-item';
-                item.setAttribute('data-student', llm.students.join(','));
-                item.setAttribute('data-homework', llm.homeworks.join(','));
-                const id = `llm_${index}_${llm.name.replace(/\s+/g, '_').toLowerCase()}`;
-                item.innerHTML = `
-                    <input type="checkbox" id="${id}" value="${llm.name}" onchange="updateDisplay('llm')">
-                    <label for="${id}">${llm.name}</label>
-                `;
-                container.appendChild(item);
+                try {
+                    // Handle both object format {name, students, homeworks} and string format
+                    let llmName;
+                    if (typeof llm === 'string') {
+                        llmName = llm;
+                    } else if (llm && typeof llm === 'object') {
+                        llmName = llm.name || llm.llm || llm.agent || llm;
+                    } else {
+                        llmName = String(llm);
+                    }
+                    
+                    if (!llmName || (typeof llmName === 'string' && llmName.trim() === '')) {
+                        console.warn('Skipping LLM with no name:', llm);
+                        return;
+                    }
+                    
+                    llmName = String(llmName).trim();
+                    
+                    const item = document.createElement('div');
+                    item.className = 'dropdown-item';
+                    
+                    // Handle students and homeworks - support both object and string formats
+                    const students = (typeof llm === 'object' && llm.students && Array.isArray(llm.students)) ? llm.students : [];
+                    const homeworks = (typeof llm === 'object' && llm.homeworks && Array.isArray(llm.homeworks)) ? llm.homeworks : [];
+                    
+                    item.setAttribute('data-student', students.join(','));
+                    item.setAttribute('data-homework', homeworks.join(','));
+                    
+                    const safeName = llmName.replace(/\s+/g, '_').replace(/[^a-z0-9_]/gi, '').toLowerCase();
+                    const id = `llm_${index}_${safeName}`;
+                    const isSelected = currentlySelected.includes(llmName);
+                    
+                    item.innerHTML = `
+                        <input type="checkbox" id="${id}" value="${llmName}" ${isSelected ? 'checked' : ''} onchange="updateDisplay('llm')">
+                        <label for="${id}">${llmName}</label>
+                    `;
+                    container.appendChild(item);
+                    itemsAdded++;
+                } catch (error) {
+                    console.error('Error processing LLM item:', llm, error);
+                }
             });
+            
+            // Update display after repopulating
+            updateDisplay('llm');
+            const llmNames = llms.map(l => {
+                if (typeof l === 'string') return l;
+                if (l && typeof l === 'object') return l.name || l.llm || l.agent || String(l);
+                return String(l);
+            }).filter(Boolean);
+            console.log(`Populated LLM dropdown with ${itemsAdded} agents (out of ${llms.length} provided):`, llmNames);
+            
+            if (itemsAdded === 0) {
+                container.innerHTML = '<div class="dropdown-item"><p style="padding: 10px; color: #6c757d;">No valid LLM agents found in data</p></div>';
+            }
         }
 
         // Populate dropdowns from posts data
@@ -1247,19 +1372,35 @@
                         studentsSet.add(post.author);
                     }
                     // Check for homework_number - need to handle 0, "N/A", "unknown", and other values
-                    if (post.homework_number !== null && post.homework_number !== undefined && post.homework_number !== '') {
-                        homeworksSet.add(String(post.homework_number));
+                    // Use !== null && !== undefined to properly handle 0 (which is falsy)
+                    // Allow 0, numeric values, "N/A", but exclude null, undefined, empty string, and "unknown"
+                    if (post.homework_number !== null && 
+                        post.homework_number !== undefined && 
+                        post.homework_number !== '') {
+                        // Convert to string for consistent comparison, including 0
+                        const hwStr = String(post.homework_number);
+                        // Add all valid homework numbers including 0, but exclude "unknown"
+                        if (hwStr !== 'unknown' && hwStr !== 'Unknown') {
+                            homeworksSet.add(hwStr);
+                        }
                     }
-                    if (post.llm_agent && post.llm_agent !== 'Unknown') {
-                        llmsSet.add(post.llm_agent);
+                    // Extract LLM agent - be more inclusive to catch all LLMs
+                    const llmAgent = post.llm_agent || post.llm || post.agent;
+                    if (llmAgent && 
+                        llmAgent !== 'Unknown' && 
+                        llmAgent !== 'unknown' && 
+                        llmAgent.trim() !== '') {
+                        llmsSet.add(llmAgent.trim());
                     }
                 });
                 
                 console.log(`Found ${studentsSet.size} students, ${homeworksSet.size} homeworks, ${llmsSet.size} LLMs`);
+                console.log('Homework values in set:', Array.from(homeworksSet));
+                console.log('LLM values in set:', Array.from(llmsSet));
                 
                 // Populate dropdowns
                 const students = Array.from(studentsSet).sort();
-                // Sort homeworks: numeric values first, then "unknown", then "N/A" at the end
+                // Sort homeworks: numeric values first (including 0), then "unknown", then "N/A" at the end
                 const homeworks = Array.from(homeworksSet).sort((a, b) => {
                     // N/A goes to very end
                     if (a === 'N/A' || a === 'n/a') return 1;
@@ -1267,13 +1408,16 @@
                     // "unknown" goes before N/A but after numbers
                     if (a === 'unknown' || a === 'Unknown') return 1;
                     if (b === 'unknown' || b === 'Unknown') return -1;
+                    // Handle numeric values including 0
                     const numA = parseInt(a);
                     const numB = parseInt(b);
                     if (isNaN(numA) && isNaN(numB)) return a.localeCompare(b);
                     if (isNaN(numA)) return 1;
                     if (isNaN(numB)) return -1;
+                    // Both are numbers, sort numerically (0 will be first)
                     return numA - numB;
                 });
+                console.log('Sorted homeworks:', homeworks);
                 const llms = Array.from(llmsSet).sort();
                 
                 populateStudentDropdown(students.map(name => ({name})));
@@ -1282,11 +1426,36 @@
                     students: posts.filter(p => String(p.homework_number) === num && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
                     llms: posts.filter(p => String(p.homework_number) === num && p.llm_agent && p.llm_agent !== 'Unknown').map(p => p.llm_agent).filter(Boolean)
                 })));
-                populateLLMDropdown(llms.map(name => ({
-                    name: name,
-                    students: posts.filter(p => p.llm_agent === name && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
-                    homeworks: posts.filter(p => p.llm_agent === name && p.homework_number).map(p => String(p.homework_number)).filter(Boolean)
-                })));
+                // Extract LLMs more comprehensively - check multiple fields
+                const llmsWithData = llms.map(name => {
+                    // Find posts with this LLM - check multiple possible field names
+                    const matchingPosts = posts.filter(p => {
+                        const postLLM = p.llm_agent || p.llm || p.agent;
+                        if (!postLLM) return false;
+                        const postLLMStr = String(postLLM).trim();
+                        const nameStr = String(name).trim();
+                        return postLLMStr === nameStr;
+                    });
+                    return {
+                        name: String(name).trim(),
+                        students: matchingPosts.filter(p => p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
+                        homeworks: matchingPosts.filter(p => p.homework_number !== null && p.homework_number !== undefined).map(p => String(p.homework_number)).filter(Boolean)
+                    };
+                }).filter(llm => llm.name && llm.name !== ''); // Filter out empty names
+                
+                console.log(`Populating LLM dropdown with ${llmsWithData.length} agents from posts`);
+                console.log('LLMs with data:', llmsWithData);
+                if (llmsWithData.length > 0) {
+                    populateLLMDropdown(llmsWithData);
+                } else {
+                    console.warn('No LLMs found in posts data');
+                    // Don't call fetchLLMs() here as it will show an error
+                    // Instead, just show a message in the dropdown
+                    const container = document.getElementById('llmDropdownItems');
+                    if (container) {
+                        container.innerHTML = '<div class="dropdown-item"><p style="padding: 10px; color: #6c757d;">No LLM agents found in posts. Make sure posts have llm_agent field.</p></div>';
+                    }
+                }
                 
                 // Also update global data
                 studentsData = students.map(name => ({name}));
@@ -1295,11 +1464,21 @@
                     students: posts.filter(p => String(p.homework_number) === num && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
                     llms: posts.filter(p => String(p.homework_number) === num && p.llm_agent && p.llm_agent !== 'Unknown').map(p => p.llm_agent).filter(Boolean)
                 }));
-                llmsData = llms.map(name => ({
-                    name: name,
-                    students: posts.filter(p => p.llm_agent === name && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
-                    homeworks: posts.filter(p => p.llm_agent === name && p.homework_number).map(p => String(p.homework_number)).filter(Boolean)
-                }));
+                // Update llmsData with comprehensive matching
+                llmsData = llms.map(name => {
+                    const matchingPosts = posts.filter(p => {
+                        const postLLM = p.llm_agent || p.llm || p.agent;
+                        if (!postLLM) return false;
+                        const postLLMStr = String(postLLM).trim();
+                        const nameStr = String(name).trim();
+                        return postLLMStr === nameStr;
+                    });
+                    return {
+                        name: String(name).trim(),
+                        students: matchingPosts.filter(p => p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
+                        homeworks: matchingPosts.filter(p => p.homework_number !== null && p.homework_number !== undefined).map(p => String(p.homework_number)).filter(Boolean)
+                    };
+                }).filter(llm => llm.name && llm.name !== '');
                 
                 filterDropdowns();
             } catch (error) {
@@ -1316,12 +1495,13 @@
                         </div>
                     `;
                 }
-                // Fallback to API endpoints
+                // Fallback to API endpoints (but don't show errors for LLMs if posts failed)
                 try {
                     await Promise.all([
                         fetchStudents(),
-                        fetchHomeworks(),
-                        fetchLLMs()
+                        fetchHomeworks()
+                        // Don't call fetchLLMs() here as it will show an error
+                        // The LLM dropdown will be populated from posts when they're available
                     ]);
                 } catch (fallbackError) {
                     console.error('Fallback also failed:', fallbackError);
@@ -1439,12 +1619,13 @@
                 }
                 
                 let text = '';
-                if (type === 'student' || type === 'llm') {
-                    const label = item.querySelector('label');
-                    text = label ? label.textContent.toLowerCase() : '';
-                } else if (type === 'homework') {
-                    const label = item.querySelector('label');
-                    text = label ? label.textContent.toLowerCase() : '';
+                // Get text from label for all dropdown types
+                const label = item.querySelector('label');
+                if (label) {
+                    text = label.textContent.toLowerCase();
+                } else {
+                    // Fallback: try to get text from the item itself
+                    text = item.textContent.toLowerCase();
                 }
                 
                 if (searchLower === '' || text.includes(searchLower)) {
@@ -1488,11 +1669,57 @@
         }
 
         function clearAllSelections() {
+            // Clear all checkbox selections
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            // Update all dropdown displays
             updateDisplay('participation');
             updateDisplay('student');
             updateDisplay('homework');
             updateDisplay('llm');
+            
+            // Clear posts grid
+            const postsGrid = document.getElementById('postsGrid');
+            if (postsGrid) {
+                postsGrid.innerHTML = '<p class="placeholder">Select filters above and click Search to see posts</p>';
+            }
+            
+            // Clear executive summary text
+            const summaryText = document.getElementById('summaryText');
+            if (summaryText) {
+                summaryText.innerHTML = '<p class="placeholder">Select participation type,  author name, homework assignment, and LLM agent to view the executive summary.</p>';
+            }
+            
+            // Clear PDF viewer
+            const pdfViewer = document.getElementById('pdfViewer');
+            if (pdfViewer) {
+                pdfViewer.innerHTML = `
+                    <div class="placeholder">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <p>Annotated code PDF will appear here</p>
+                    </div>
+                `;
+            }
+            
+            // Clear word cloud
+            const wordcloud = document.getElementById('wordcloud');
+            if (wordcloud) {
+                wordcloud.innerHTML = '';
+            }
+            
+            // Clear sentiment grid
+            const sentimentGrid = document.getElementById('sentimentGrid');
+            if (sentimentGrid) {
+                sentimentGrid.innerHTML = '';
+            }
+            
+            // Reset postsData to empty array
+            postsData = [];
+            
+            // Re-filter dropdowns to enable all options
             filterDropdowns();
         }
 
@@ -1516,6 +1743,11 @@
             const selected = Array.from(checkboxes).filter(cb => cb.checked);
             const count = selected.length;
             
+            if (!display) {
+                console.warn(`Display element not found for type: ${type}`);
+                return;
+            }
+            
             if (count === 0) {
                 const placeholderText = type === 'student' ? 'Select students...' : 
                                       type === 'homework' ? 'Select homework...' : 
@@ -1523,7 +1755,28 @@
                                       'Select participation...';
                 display.innerHTML = `<span class="dropdown-placeholder">${placeholderText}</span>`;
             } else if (count === 1) {
-                display.innerHTML = `${selected[0].nextElementSibling.textContent}<span class="selected-count">${count}</span>`;
+                // Get the label text - try multiple methods
+                const checkbox = selected[0];
+                let labelText = '';
+                // Try nextElementSibling (label after checkbox)
+                if (checkbox.nextElementSibling && checkbox.nextElementSibling.tagName === 'LABEL') {
+                    labelText = checkbox.nextElementSibling.textContent;
+                } else {
+                    // Try parent's label
+                    const parent = checkbox.closest('.dropdown-item');
+                    if (parent) {
+                        const label = parent.querySelector('label');
+                        if (label) {
+                            labelText = label.textContent;
+                        } else {
+                            // Fallback to checkbox value
+                            labelText = checkbox.value;
+                        }
+                    } else {
+                        labelText = checkbox.value;
+                    }
+                }
+                display.innerHTML = `${labelText}<span class="selected-count">${count}</span>`;
             } else {
                 display.innerHTML = `${count} selected<span class="selected-count">${count}</span>`;
             }
@@ -1535,22 +1788,41 @@
             const selectedStudents = getSelectedValues('student');
             const selectedHomework = getSelectedValues('homework');
             const selectedLLMs = getSelectedValues('llm');
+            const selectedParticipation = getSelectedValues('participation');
 
             // Use posts data for filtering - this is the source of truth
+            // If no posts data, fetch it first (but don't block)
             const allPosts = postsData.length > 0 ? postsData : [];
             
+            // If we have no posts data but need to filter, try to fetch it
+            if (allPosts.length === 0 && (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0)) {
+                // Don't block, just proceed with empty data (will show all options)
+                console.log('No posts data available for filtering, showing all options');
+            }
+            
             // Helper function to check if a post matches current filters
-            function postMatchesFilters(post, student = null, homework = null, llm = null) {
+            function postMatchesFilters(post, student = null, homework = null, llm = null, participation = null) {
                 const matchesStudent = !student || (post.author && post.author === student);
-                const matchesHw = !homework || String(post.homework_number || '') === String(homework);
-                const matchesLLM = !llm || (post.llm_agent && post.llm_agent === llm);
-                return matchesStudent && matchesHw && matchesLLM;
+                // Handle homework matching - treat 0 the same as other numbers
+                let matchesHw = true;
+                if (homework !== null && homework !== undefined && homework !== '') {
+                    const postHw = post.homework_number;
+                    // Convert both to strings for comparison, handling 0 properly
+                    const postHwStr = postHw !== null && postHw !== undefined ? String(postHw) : '';
+                    const homeworkStr = String(homework);
+                    matchesHw = postHwStr === homeworkStr;
+                }
+                // Handle LLM matching - check if llm_agent matches (case-insensitive)
+                const matchesLLM = !llm || (post.llm_agent && post.llm_agent.toLowerCase() === llm.toLowerCase());
+                const participationType = post.participation_type || post.participation || '';
+                const matchesParticipation = !participation || participationType.toUpperCase() === participation.toUpperCase();
+                return matchesStudent && matchesHw && matchesLLM && matchesParticipation;
             }
             
             // Helper function to check if there are any posts matching the current selection
-            function hasMatchingPosts(student = null, homework = null, llm = null) {
+            function hasMatchingPosts(student = null, homework = null, llm = null, participation = null) {
                 if (allPosts.length === 0) return true; // If no posts data, show all
-                return allPosts.some(post => postMatchesFilters(post, student, homework, llm));
+                return allPosts.some(post => postMatchesFilters(post, student, homework, llm, participation));
             }
             
             // Filter Homework dropdown
@@ -1558,27 +1830,46 @@
                 const hwValue = item.querySelector('input').value;
                 let show = true;
                 
-                // Check if any posts match this homework with selected students/LLMs
-                if (selectedStudents.length > 0 || selectedLLMs.length > 0) {
+                // Check if any posts match this homework with selected students/LLMs/participation
+                if (selectedStudents.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0) {
                     show = false;
-                    // Check if any selected student + this homework + any selected LLM has a matching post
+                    // Check if any selected student + this homework + any selected LLM + any selected participation has a matching post
                     for (const student of selectedStudents.length > 0 ? selectedStudents : [null]) {
                         for (const llm of selectedLLMs.length > 0 ? selectedLLMs : [null]) {
-                            if (hasMatchingPosts(student, hwValue, llm)) {
-                                show = true;
-                                break;
+                            for (const participation of selectedParticipation.length > 0 ? selectedParticipation : [null]) {
+                                if (hasMatchingPosts(student, hwValue, llm, participation)) {
+                                    show = true;
+                                    break;
+                                }
                             }
+                            if (show) break;
                         }
                         if (show) break;
                     }
                 }
 
-                if (!show && (selectedStudents.length > 0 || selectedLLMs.length > 0)) {
-                    item.classList.add('disabled');
-                    item.querySelector('input').disabled = true;
+                const checkbox = item.querySelector('input');
+                const isCurrentlySelected = checkbox && checkbox.checked;
+                
+                if (!show && (selectedStudents.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0)) {
+                    // Only disable if not currently selected (preserve user's current selection)
+                    if (!isCurrentlySelected) {
+                        item.classList.add('disabled');
+                        if (checkbox) {
+                            checkbox.disabled = true;
+                        }
+                    } else {
+                        // Keep it enabled if it's selected
+                        item.classList.remove('disabled');
+                        if (checkbox) {
+                            checkbox.disabled = false;
+                        }
+                    }
                 } else {
                     item.classList.remove('disabled');
-                    item.querySelector('input').disabled = false;
+                    if (checkbox) {
+                        checkbox.disabled = false;
+                    }
                 }
             });
 
@@ -1587,22 +1878,25 @@
                 const student = item.querySelector('input').value;
                 let show = true;
                 
-                // Check if any posts match this student with selected homeworks/LLMs
-                if (selectedHomework.length > 0 || selectedLLMs.length > 0) {
+                // Check if any posts match this student with selected homeworks/LLMs/participation
+                if (selectedHomework.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0) {
                     show = false;
-                    // Check if this student + any selected homework + any selected LLM has a matching post
+                    // Check if this student + any selected homework + any selected LLM + any selected participation has a matching post
                     for (const hw of selectedHomework.length > 0 ? selectedHomework : [null]) {
                         for (const llm of selectedLLMs.length > 0 ? selectedLLMs : [null]) {
-                            if (hasMatchingPosts(student, hw, llm)) {
-                                show = true;
-                                break;
+                            for (const participation of selectedParticipation.length > 0 ? selectedParticipation : [null]) {
+                                if (hasMatchingPosts(student, hw, llm, participation)) {
+                                    show = true;
+                                    break;
+                                }
                             }
+                            if (show) break;
                         }
                         if (show) break;
                     }
                 }
 
-                if (!show && (selectedHomework.length > 0 || selectedLLMs.length > 0)) {
+                if (!show && (selectedHomework.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0)) {
                     item.classList.add('disabled');
                     item.querySelector('input').disabled = true;
                 } else {
@@ -1616,27 +1910,97 @@
                 const llm = item.querySelector('input').value;
                 let show = true;
                 
-                // Check if any posts match this LLM with selected students/homeworks
-                if (selectedStudents.length > 0 || selectedHomework.length > 0) {
+                // Check if any posts match this LLM with selected students/homeworks/participation
+                if (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedParticipation.length > 0) {
                     show = false;
-                    // Check if any selected student + any selected homework + this LLM has a matching post
+                    // Check if any selected student + any selected homework + this LLM + any selected participation has a matching post
+                    // We need to check all combinations to see if this LLM is valid
                     for (const student of selectedStudents.length > 0 ? selectedStudents : [null]) {
                         for (const hw of selectedHomework.length > 0 ? selectedHomework : [null]) {
-                            if (hasMatchingPosts(student, hw, llm)) {
-                                show = true;
-                                break;
+                            for (const participation of selectedParticipation.length > 0 ? selectedParticipation : [null]) {
+                                if (hasMatchingPosts(student, hw, llm, participation)) {
+                                    show = true;
+                                    break;
+                                }
                             }
+                            if (show) break;
                         }
                         if (show) break;
                     }
                 }
 
-                if (!show && (selectedStudents.length > 0 || selectedHomework.length > 0)) {
-                    item.classList.add('disabled');
-                    item.querySelector('input').disabled = true;
+                // Disable if no matching posts found and there are active filters
+                // BUT don't disable if this item is already selected (to prevent losing selections)
+                const checkbox = item.querySelector('input');
+                const isCurrentlySelected = checkbox && checkbox.checked;
+                
+                if (!show && (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedParticipation.length > 0)) {
+                    // Only disable if not currently selected (preserve user's current selection)
+                    if (!isCurrentlySelected) {
+                        item.classList.add('disabled');
+                        if (checkbox) {
+                            checkbox.disabled = true;
+                        }
+                    } else {
+                        // Keep it enabled if it's selected, even if no matches (user might be building their selection)
+                        item.classList.remove('disabled');
+                        if (checkbox) {
+                            checkbox.disabled = false;
+                        }
+                    }
                 } else {
                     item.classList.remove('disabled');
-                    item.querySelector('input').disabled = false;
+                    if (checkbox) {
+                        checkbox.disabled = false;
+                    }
+                }
+            });
+
+            // Filter Participation dropdown
+            document.querySelectorAll('#participationDropdown .dropdown-item').forEach(item => {
+                const participation = item.querySelector('input').value;
+                let show = true;
+                
+                // Check if any posts match this participation with selected students/homeworks/LLMs
+                if (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedLLMs.length > 0) {
+                    show = false;
+                    // Check if any selected student + any selected homework + any selected LLM + this participation has a matching post
+                    for (const student of selectedStudents.length > 0 ? selectedStudents : [null]) {
+                        for (const hw of selectedHomework.length > 0 ? selectedHomework : [null]) {
+                            for (const llm of selectedLLMs.length > 0 ? selectedLLMs : [null]) {
+                                if (hasMatchingPosts(student, hw, llm, participation)) {
+                                    show = true;
+                                    break;
+                                }
+                            }
+                            if (show) break;
+                        }
+                        if (show) break;
+                    }
+                }
+
+                const checkbox = item.querySelector('input');
+                const isCurrentlySelected = checkbox && checkbox.checked;
+                
+                if (!show && (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedLLMs.length > 0)) {
+                    // Only disable if not currently selected (preserve user's current selection)
+                    if (!isCurrentlySelected) {
+                        item.classList.add('disabled');
+                        if (checkbox) {
+                            checkbox.disabled = true;
+                        }
+                    } else {
+                        // Keep it enabled if it's selected
+                        item.classList.remove('disabled');
+                        if (checkbox) {
+                            checkbox.disabled = false;
+                        }
+                    }
+                } else {
+                    item.classList.remove('disabled');
+                    if (checkbox) {
+                        checkbox.disabled = false;
+                    }
                 }
             });
         }
@@ -1652,7 +2016,53 @@
             } else if (type === 'participation') {
                 checkboxes = document.querySelectorAll('#participationDropdown input[type="checkbox"]');
             }
-            return Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            // Filter out disabled checkboxes and only return checked, enabled ones
+            return Array.from(checkboxes)
+                .filter(cb => cb.checked && !cb.disabled)
+                .map(cb => cb.value);
+        }
+
+        function setSelectedValue(type, value) {
+            let checkboxes;
+            if (type === 'student') {
+                checkboxes = document.querySelectorAll('#studentDropdown input[type="checkbox"]');
+            } else if (type === 'homework') {
+                checkboxes = document.querySelectorAll('#homeworkDropdown input[type="checkbox"]');
+            } else if (type === 'llm') {
+                checkboxes = document.querySelectorAll('#llmDropdown input[type="checkbox"]');
+            } else if (type === 'participation') {
+                checkboxes = document.querySelectorAll('#participationDropdown input[type="checkbox"]');
+            }
+            
+            // Uncheck all first
+            checkboxes.forEach(cb => cb.checked = false);
+            
+            // Check the matching checkbox - try multiple comparison methods
+            let found = false;
+            checkboxes.forEach(cb => {
+                // Try exact match
+                if (cb.value === value) {
+                    cb.checked = true;
+                    found = true;
+                }
+                // Try string comparison
+                else if (String(cb.value) === String(value)) {
+                    cb.checked = true;
+                    found = true;
+                }
+                // Try number comparison (for homework numbers)
+                else if (type === 'homework' && !isNaN(cb.value) && !isNaN(value)) {
+                    if (Number(cb.value) === Number(value)) {
+                        cb.checked = true;
+                        found = true;
+                    }
+                }
+            });
+            
+            // Always update display immediately
+            updateDisplay(type);
+            
+            return found;
         }
 
         function switchTab(tabName) {
@@ -1670,6 +2080,247 @@
             } else if (tabName === 'wordcloud') {
                 tabs[2].classList.add('active');
                 document.getElementById('wordcloudTab').classList.add('active');
+            }
+            
+            // Ensure dropdown displays are updated after tab switch
+            // This prevents dropdowns from appearing empty after navigation
+            setTimeout(() => {
+                updateDisplay('student');
+                updateDisplay('homework');
+                updateDisplay('llm');
+                updateDisplay('participation');
+            }, 50);
+        }
+
+        async function navigateToPostSummary(post) {
+            try {
+                console.log('navigateToPostSummary - Full post object:', JSON.stringify(post, null, 2));
+                console.log('Post content field:', post.content);
+                console.log('Post content type:', typeof post.content);
+                
+                // Ensure posts data is available for filtering
+                if (postsData.length === 0) {
+                    console.log('Loading posts data for filtering...');
+                    // Fetch all posts without filters to populate dropdowns
+                    const allPosts = await fetchPosts([], [], [], []);
+                    postsData = allPosts;
+                }
+                
+                // Extract post data
+                const author = post.author;
+                const homework = post.homework_number;
+                const llm = post.llm_agent;
+                const participation = post.participation_type || post.participation;
+                
+                // Try to set dropdown selections if data is available, but don't require them
+                // We can still display the post content even if some fields are missing
+                if (author) {
+                    let studentFound = setSelectedValue('student', author);
+                    if (!studentFound) {
+                        // Try case-insensitive matching
+                        const studentCheckboxes = document.querySelectorAll('#studentDropdown input[type="checkbox"]');
+                        studentCheckboxes.forEach(cb => {
+                            if (cb.value && cb.value.toLowerCase() === author.toLowerCase()) {
+                                cb.checked = true;
+                                studentFound = true;
+                            }
+                        });
+                        if (studentFound) {
+                            updateDisplay('student');
+                        }
+                    } else {
+                        // Ensure display is updated even if found immediately
+                        updateDisplay('student');
+                    }
+                }
+                
+                if (homework !== null && homework !== undefined && homework !== '' && homework !== 'unknown' && homework !== 'N/A' && homework !== 'NA') {
+                    // Handle homework value - normalize it
+                    let homeworkValue = homework;
+                    
+                    // Normalize homework value - keep as number if numeric, otherwise as string
+                    if (homework === 0 || homework === '0') {
+                        homeworkValue = 0; // Keep as number 0
+                    } else if (!isNaN(homework) && homework !== '') {
+                        homeworkValue = Number(homework); // Convert to number
+                    } else {
+                        homeworkValue = String(homework); // Keep as string
+                    }
+                    
+                    let homeworkFound = setSelectedValue('homework', homeworkValue);
+                    
+                    // If homework not found, try alternative formats
+                    if (!homeworkFound) {
+                        // Try as string if it was a number
+                        if (typeof homeworkValue === 'number') {
+                            homeworkFound = setSelectedValue('homework', String(homeworkValue));
+                        } else {
+                            // Try as number if it was a string
+                            const numValue = Number(homeworkValue);
+                            if (!isNaN(numValue)) {
+                                homeworkFound = setSelectedValue('homework', numValue);
+                            }
+                        }
+                    }
+                    // Ensure display is updated
+                    updateDisplay('homework');
+                }
+                
+                if (llm) {
+                    let llmFound = setSelectedValue('llm', llm);
+                    if (!llmFound) {
+                        // Try case-insensitive matching
+                        const llmCheckboxes = document.querySelectorAll('#llmDropdown input[type="checkbox"]');
+                        llmCheckboxes.forEach(cb => {
+                            if (cb.value && cb.value.toLowerCase() === llm.toLowerCase()) {
+                                cb.checked = true;
+                                llmFound = true;
+                            }
+                        });
+                        if (llmFound) {
+                            updateDisplay('llm');
+                        }
+                    } else {
+                        // Ensure display is updated even if found immediately
+                        updateDisplay('llm');
+                    }
+                }
+                
+                if (participation) {
+                    let participationFound = setSelectedValue('participation', participation);
+                    if (!participationFound) {
+                        // Try case-insensitive matching
+                        const participationCheckboxes = document.querySelectorAll('#participationDropdown input[type="checkbox"]');
+                        participationCheckboxes.forEach(cb => {
+                            if (cb.value && cb.value.toUpperCase() === participation.toUpperCase()) {
+                                cb.checked = true;
+                                participationFound = true;
+                            }
+                        });
+                        if (participationFound) {
+                            updateDisplay('participation');
+                        }
+                    } else {
+                        updateDisplay('participation');
+                    }
+                }
+                
+                // Re-filter dropdowns
+                filterDropdowns();
+                
+                // Force update all dropdown displays before switching tabs
+                updateDisplay('student');
+                updateDisplay('homework');
+                updateDisplay('llm');
+                updateDisplay('participation');
+                
+                // Switch to summary tab first
+                switchTab('summary');
+                
+                // Wait a bit to ensure tab switch is complete
+                await new Promise(resolve => setTimeout(resolve, 150));
+                
+                // Force update displays again after tab switch (in case they were cleared)
+                updateDisplay('student');
+                updateDisplay('homework');
+                updateDisplay('llm');
+                updateDisplay('participation');
+                
+                // Re-filter dropdowns again after tab switch
+                filterDropdowns();
+                
+                // Display the post's content as the executive summary
+                // This works even if dropdown selections weren't set
+                displayPostSummary(post);
+            } catch (error) {
+                console.error('Error navigating to post summary:', error);
+                alert('An error occurred while navigating to the executive summary. Please try selecting the filters manually.');
+            }
+        }
+
+        function displayPostSummary(post) {
+            console.log('displayPostSummary called with post:', post);
+            console.log('Post content field:', post.content);
+            console.log('Post content type:', typeof post.content);
+            console.log('Post content length:', post.content ? post.content.length : 0);
+            
+            // Get the post content - prioritize content field (which comes from thread.content)
+            let postContent = post.content;
+            
+            console.log('Initial postContent:', postContent ? postContent.substring(0, 100) : 'null/undefined');
+            
+            // If content is not available, try other fields
+            if (!postContent || (typeof postContent === 'string' && postContent.trim() === '')) {
+                console.log('Content not found, trying alternatives...');
+                postContent = post.text || post.excerpt || post.body || '';
+                console.log('Alternative content found:', postContent ? postContent.substring(0, 100) : 'none');
+            }
+            
+            // If still no content, show a message
+            if (!postContent || (typeof postContent === 'string' && postContent.trim() === '')) {
+                console.warn('No content available for post');
+                postContent = 'No content available for this post.';
+            }
+            
+            console.log('Final postContent to display:', postContent ? postContent.substring(0, 200) : 'empty');
+            
+            // Format the content - preserve line breaks and handle HTML
+            // If content contains HTML, we'll display it as-is (it's already HTML from Ed)
+            // Otherwise, convert newlines to <br> tags
+            let formattedContent = postContent;
+            
+            // Check if content is already HTML (contains HTML tags)
+            const isHTML = /<[a-z][\s\S]*>/i.test(postContent);
+            console.log('Content is HTML:', isHTML);
+            
+            if (!isHTML) {
+                // Not HTML, so convert newlines to <br> tags
+                formattedContent = postContent.replace(/\n/g, '<br>');
+            }
+            // If it's already HTML, use it as-is
+            
+            // Display in summary text area
+            const summaryTextEl = document.getElementById('summaryText');
+            if (summaryTextEl) {
+                summaryTextEl.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #212529; padding: 10px;">${formattedContent}</div>`;
+                console.log('Content displayed in summaryText element');
+            } else {
+                console.error('summaryText element not found!');
+            }
+            
+            // Handle PDF display
+            const pdfUrls = post.pdf_urls || [];
+            const pdfViewerEl = document.getElementById('pdfViewer');
+            if (pdfViewerEl) {
+                if (pdfUrls.length > 0) {
+                    let pdfHtml = '';
+                    if (pdfUrls.length === 1) {
+                        pdfHtml = `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                    } else {
+                        pdfHtml = '<div style="margin-bottom: 15px;">';
+                        pdfUrls.forEach((url, index) => {
+                            pdfHtml += `<div style="margin-bottom: 10px;">
+                                <a href="${url}" target="_blank" style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: #f8f9fa; border-radius: 4px; display: inline-block;">
+                                    PDF ${index + 1}
+                                </a>
+                            </div>`;
+                        });
+                        pdfHtml += '</div>';
+                        pdfHtml += `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                    }
+                    pdfViewerEl.innerHTML = pdfHtml;
+                } else {
+                    pdfViewerEl.innerHTML = `
+                        <div style="text-align: center;">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#003262" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <p style="color: #003262; font-weight: 600; margin-top: 10px;">No PDF Available</p>
+                            <p style="color: #6c757d; font-size: 14px;">${post.author || 'Unknown'} - ${post.homework_number !== null && post.homework_number !== undefined && post.homework_number !== '' && post.homework_number !== 'unknown' ? `Homework ${post.homework_number}` : 'N/A'} - ${post.llm_agent || 'Unknown'}</p>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1689,72 +2340,95 @@
             const students = getSelectedValues('student');
             const homeworks = getSelectedValues('homework');
             const llms = getSelectedValues('llm');
+            const participation = getSelectedValues('participation');
 
-            if (students.length === 0 || homeworks.length === 0 || llms.length === 0) {
-                alert('Please select at least one option from each dropdown');
+            // For executive summary, we need at least one from each dropdown
+            if (students.length === 0 || homeworks.length === 0 || llms.length === 0 || participation.length === 0) {
+                alert('Please select at least one option from each dropdown (Participation, Author Name, Homework Number, and LLM Agent)');
                 return;
             }
 
             const student = students[0];
             const homework = homeworks[0];
             const llm = llms[0];
+            const part = participation[0];
 
             // Show loading state
-            document.getElementById('summaryText').innerHTML = '<p class="placeholder">Loading submission data...</p>';
-            document.getElementById('pdfViewer').innerHTML = '<div class="loading"><div class="loading-spinner"></div><p style="margin-top: 10px;">Loading PDF...</p></div>';
+            const summaryTextEl = document.getElementById('summaryText');
+            const pdfViewerEl = document.getElementById('pdfViewer');
+            if (summaryTextEl) {
+                summaryTextEl.innerHTML = '<p class="placeholder">Loading submission data...</p>';
+            }
+            if (pdfViewerEl) {
+                pdfViewerEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p style="margin-top: 10px;">Loading PDF...</p></div>';
+            }
 
+            console.log('Fetching submission:', { student, homework, llm });
             const data = await fetchSubmission(student, homework, llm);
+            console.log('Received submission data:', data);
 
             if (data && data.summary) {
                 // Format summary with line breaks
                 const formattedSummary = data.summary.replace(/\n/g, '<br>');
-                document.getElementById('summaryText').innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8;">${formattedSummary}</div>`;
+                const summaryTextEl = document.getElementById('summaryText');
+                if (summaryTextEl) {
+                    summaryTextEl.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #212529; padding: 10px;">${formattedSummary}</div>`;
+                }
                 
                 // Handle PDF display
                 const pdfUrls = data.pdfUrls || (data.pdfUrl ? [data.pdfUrl] : []);
-                if (pdfUrls.length > 0) {
-                    let pdfHtml = '';
-                    if (pdfUrls.length === 1) {
-                        pdfHtml = `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                const pdfViewerEl = document.getElementById('pdfViewer');
+                if (pdfViewerEl) {
+                    if (pdfUrls.length > 0) {
+                        let pdfHtml = '';
+                        if (pdfUrls.length === 1) {
+                            pdfHtml = `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                        } else {
+                            pdfHtml = '<div style="margin-bottom: 15px;">';
+                            pdfUrls.forEach((url, index) => {
+                                pdfHtml += `<div style="margin-bottom: 10px;">
+                                    <a href="${url}" target="_blank" style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: #f8f9fa; border-radius: 4px; display: inline-block;">
+                                        PDF ${index + 1}
+                                    </a>
+                                </div>`;
+                            });
+                            pdfHtml += '</div>';
+                            pdfHtml += `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                        }
+                        pdfViewerEl.innerHTML = pdfHtml;
                     } else {
-                        pdfHtml = '<div style="margin-bottom: 15px;">';
-                        pdfUrls.forEach((url, index) => {
-                            pdfHtml += `<div style="margin-bottom: 10px;">
-                                <a href="${url}" target="_blank" style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: #f8f9fa; border-radius: 4px; display: inline-block;">
-                                    PDF ${index + 1}
-                                </a>
-                            </div>`;
-                        });
-                        pdfHtml += '</div>';
-                        pdfHtml += `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                        pdfViewerEl.innerHTML = `
+                            <div style="text-align: center;">
+                                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#003262" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <p style="color: #003262; font-weight: 600; margin-top: 10px;">No PDF Available</p>
+                                <p style="color: #6c757d; font-size: 14px;">${student} - Homework ${homework} - ${llm}</p>
+                            </div>
+                        `;
                     }
-                    document.getElementById('pdfViewer').innerHTML = pdfHtml;
-                } else {
-                    document.getElementById('pdfViewer').innerHTML = `
-                        <div style="text-align: center;">
-                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#003262" stroke-width="2">
+                }
+            } else {
+                const summaryTextEl = document.getElementById('summaryText');
+                const pdfViewerEl = document.getElementById('pdfViewer');
+                if (summaryTextEl) {
+                    summaryTextEl.innerHTML = `
+                        <p class="placeholder">No submission found for ${student} on Homework ${homework} using ${llm}.</p>
+                        <p class="placeholder" style="margin-top: 10px; font-size: 14px;">Please check your API connection or verify the data exists in the database.</p>
+                    `;
+                }
+                if (pdfViewerEl) {
+                    pdfViewerEl.innerHTML = `
+                        <div class="placeholder">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
-                            <p style="color: #003262; font-weight: 600; margin-top: 10px;">No PDF Available</p>
-                            <p style="color: #6c757d; font-size: 14px;">${student} - Homework ${homework} - ${llm}</p>
+                            <p>No PDF available</p>
                         </div>
                     `;
                 }
-            } else {
-                document.getElementById('summaryText').innerHTML = `
-                    <p class="placeholder">No submission found for ${student} on Homework ${homework} using ${llm}.</p>
-                    <p class="placeholder" style="margin-top: 10px; font-size: 14px;">Please check your API connection or verify the data exists in the database.</p>
-                `;
-                document.getElementById('pdfViewer').innerHTML = `
-                    <div class="placeholder">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                        <p>No PDF available</p>
-                    </div>
-                `;
             }
         }
 
@@ -1773,6 +2447,19 @@
             
             // Always fetch posts (needed for both tabs)
             const posts = await fetchPosts(participation, students, homeworks, llms);
+            
+            // Update global postsData for filtering - fetch ALL posts to ensure dropdowns have complete data
+            // This ensures all LLMs are available in the dropdown even if they're not in the current filter results
+            try {
+                const allPosts = await fetchPosts([], [], [], []);
+                postsData = allPosts;
+                // Only refresh dropdowns if we have new data - don't clear existing selections unnecessarily
+                // The refresh interval will handle regular updates
+            } catch (error) {
+                console.error('Error fetching all posts:', error);
+                // Fallback: just use the filtered posts
+                postsData = posts;
+            }
             
             // Display posts if on Posts tab
             if (activeTab.includes('Posts')) {
@@ -1801,21 +2488,33 @@
             posts.forEach(post => {
                 const card = document.createElement('div');
                 card.className = 'post-card';
-                card.onclick = () => {
-                    // Handle post click - show full content
-                    console.log('Post clicked:', post);
-                    if (post.url) {
-                        window.open(post.url, '_blank');
+                card.style.cursor = 'pointer';
+                card.onclick = (e) => {
+                    // Don't navigate if clicking on the "View on Ed" link or any link
+                    if (e.target.tagName === 'A' || e.target.closest('a')) {
+                        return;
                     }
+                    
+                    // Navigate to executive summary page
+                    navigateToPostSummary(post);
                 };
                 
-                const participationClass = post.participation ? post.participation.toLowerCase() : 'a';
-                const participationLabel = post.participation || 'A';
+                // Use participation_type field, not participation
+                const participationType = post.participation_type || post.participation || 'A';
+                const participationClass = participationType.toLowerCase();
+                const participationLabel = participationType;
                 
                 // Build metadata string
                 let metaInfo = [];
                 if (post.post_number) metaInfo.push(`Post #${post.post_number}`);
-                if (post.homework_number) metaInfo.push(`HW ${post.homework_number}`);
+                // Handle homework_number - show "Homework 0" for 0, not "unknown"
+                if (post.homework_number !== null && post.homework_number !== undefined && post.homework_number !== '' && post.homework_number !== 'unknown') {
+                    if (post.homework_number === 0 || post.homework_number === '0') {
+                        metaInfo.push('HW 0');
+                    } else {
+                        metaInfo.push(`HW ${post.homework_number}`);
+                    }
+                }
                 if (post.llm_agent) metaInfo.push(post.llm_agent);
                 
                 // Check for PDFs
@@ -1827,11 +2526,14 @@
                     <div class="post-meta">
                         <p class="post-author">${post.author || 'Unknown'}</p>
                         <p class="participation-badge ${participationClass}">Participation ${participationLabel}</p>
-                        ${hasPdf ? '<span style="color: #28a745; font-size: 12px; font-weight: 600;">📄 PDF</span>' : ''}
+                        ${hasPdf ? '<span style="color: #28a745; font-size: 15px; font-weight: 700;">📄 PDF</span>' : ''}
                     </div>
-                    ${metaInfo.length > 0 ? `<p style="color: #6c757d; font-size: 12px; margin-bottom: 8px;">${metaInfo.join(' • ')}</p>` : ''}
+                    ${metaInfo.length > 0 ? `<p style="color: #495057; font-size: 15px; margin-bottom: 12px; font-weight: 500;">${metaInfo.join(' • ')}</p>` : ''}
                     <p class="post-excerpt">${post.excerpt || post.content || 'No content available.'}</p>
-                    ${post.url ? `<a href="${post.url}" target="_blank" style="color: #003262; font-size: 12px; text-decoration: none; margin-top: 8px; display: inline-block;">View on Ed →</a>` : ''}
+                    <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+                        ${post.url ? `<a href="${post.url}" target="_blank" onclick="event.stopPropagation();" style="color: #003262; font-size: 15px; font-weight: 600; text-decoration: none; padding: 6px 12px; background: #f8f9fa; border-radius: 4px; transition: background 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">View on Ed →</a>` : ''}
+                        <span style="color: #6c757d; font-size: 14px; font-style: italic; padding: 6px 0;">Click card to view summary & PDF</span>
+                    </div>
                 `;
                 grid.appendChild(card);
             });
@@ -1886,7 +2588,7 @@
                     .enter().append('text')
                     .style('font-size', d => `${d.size}px`)
                     .style('fill', (d, i) => berkeleyColors[i % berkeleyColors.length])
-                    .style('font-family', 'Noto Serif, serif')
+                    .style('font-family', 'Source Sans Pro, sans-serif')
                     .style('font-weight', '600')
                     .attr('text-anchor', 'middle')
                     .attr('transform', d => `translate(${d.x},${d.y})`)

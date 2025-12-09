@@ -30,7 +30,7 @@ class EdPost:
     title: str
     author: str
     content: str
-    participation_type: Optional[str]  # A, B, C, or D
+    participation_type: Optional[str]  # A, B, C, D, or E
     homework_number: Optional[Union[int, str]]  # Can be int or "N/A"
     llm_agent: Optional[str]
     timestamp: str
@@ -48,6 +48,7 @@ class EdParticipationParser:
         'B': r'\bParticipation\s*b\b|\bpart\s*b\b|\bpb\b',
         'C': r'\bParticipation\s*c\b|\bpart\s*c\b|\bpc\b',
         'D': r'\bParticipation\s*d\b|\bpart\s*d\b|\bpd\b',
+        'E': r'\bParticipation\s*e\b|\bpart\s*e\b|\bpe\b|\bSpecial\s+Participation\s+E\b',
     }
     
     HOMEWORK_PATTERN = r'\bhw\s*(\d+)\b|\bhomework\s*(\d+)\b|\bhw(\d+)\b'
@@ -74,42 +75,45 @@ class EdParticipationParser:
             'llm_agent': None
         }
         
-        # Detect participation type
+        # Detect participation type FIRST (including E)
         for part_type, pattern in EdParticipationParser.PARTICIPATION_PATTERNS.items():
             if re.search(pattern, text, re.IGNORECASE):
                 result['participation_type'] = part_type
                 break
         
-        # Detect homework number - try multiple patterns
-        hw_match = re.search(EdParticipationParser.HOMEWORK_PATTERN, text, re.IGNORECASE)
-        if hw_match:
-            # Try all capture groups
-            hw_num = hw_match.group(1) or hw_match.group(2) or hw_match.group(3)
-            if hw_num:
-                try:
-                    hw_int = int(hw_num)
-                    # HW0 is valid, set to 0
-                    result['homework_number'] = hw_int
-                except (ValueError, TypeError):
-                    pass
-        
-        # Also try uppercase HW pattern (case-insensitive should catch it, but just in case)
-        if not result['homework_number']:
-            hw_upper_match = re.search(r'HW\s*(\d+)', text, re.IGNORECASE)
-            if hw_upper_match:
-                try:
-                    hw_int = int(hw_upper_match.group(1))
-                    # HW0 is valid, set to 0
-                    result['homework_number'] = hw_int
-                except (ValueError, TypeError):
-                    pass
-        
-        # Check if it's Special Participation E - if so, set to "N/A"
+        # If it's Participation E, set homework to "N/A" and skip homework detection
         if result['participation_type'] == 'E':
             result['homework_number'] = "N/A"
-        # If no homework number found and not Participation E, set to "unknown"
-        elif not result['homework_number']:
-            result['homework_number'] = "unknown"
+        else:
+            # Detect homework number - try multiple patterns (only if not Participation E)
+            hw_match = re.search(EdParticipationParser.HOMEWORK_PATTERN, text, re.IGNORECASE)
+            if hw_match:
+                # Try all capture groups
+                hw_num = hw_match.group(1) or hw_match.group(2) or hw_match.group(3)
+                if hw_num:
+                    try:
+                        hw_int = int(hw_num)
+                        # HW0 is valid, set to 0 (treat it like any other homework number)
+                        result['homework_number'] = hw_int
+                    except (ValueError, TypeError):
+                        pass
+            
+            # Also try uppercase HW pattern (case-insensitive should catch it, but just in case)
+            # Use explicit None check to handle 0 correctly (0 is falsy but valid)
+            if result['homework_number'] is None:
+                hw_upper_match = re.search(r'HW\s*(\d+)', text, re.IGNORECASE)
+                if hw_upper_match:
+                    try:
+                        hw_int = int(hw_upper_match.group(1))
+                        # HW0 is valid, set to 0 (treat it like any other homework number)
+                        result['homework_number'] = hw_int
+                    except (ValueError, TypeError):
+                        pass
+            
+            # If no homework number found and not Participation E, set to "unknown"
+            # Use explicit None check to handle 0 correctly (0 is falsy but valid)
+            if result['homework_number'] is None:
+                result['homework_number'] = "unknown"
         
         # Detect LLM agent
         for llm_name, pattern in EdParticipationParser.LLM_PATTERNS.items():
@@ -189,10 +193,111 @@ class EdIntegration:
             return None
     
     def extract_pdf_urls(self, thread) -> List[str]:
-        """Extract PDF/document URLs from thread"""
+        """Extract PDF/document URLs from thread - prioritize attached PDFs"""
         pdf_urls = []
         
-        # First, check content for PDF links in HTML
+        # PRIORITY 1: Check the raw data for attachments (this is where attached PDFs are)
+        if hasattr(thread, '_raw') and thread._raw:
+            raw_data = thread._raw
+            
+            # Check for attachments field (primary source for attached PDFs)
+            if 'attachments' in raw_data:
+                attachments = raw_data['attachments']
+                if isinstance(attachments, list):
+                    for att in attachments:
+                        if isinstance(att, dict):
+                            # Extract URL from various possible fields
+                            url = None
+                            # Try different URL field names
+                            for url_field in ['url', 'file', 'file_url', 'download_url', 'src', 'href']:
+                                if url_field in att and att[url_field]:
+                                    url = att[url_field]
+                                    break
+                            
+                            # If no URL found, try to construct from file_id or id
+                            if not url:
+                                file_id = att.get('file_id') or att.get('id')
+                                if file_id:
+                                    # Construct Ed URL for file
+                                    url = f"https://us.edstem.org/api/files/{file_id}"
+                            
+                            if url:
+                                # Check if it's a PDF by extension or type
+                                file_type = att.get('type', '').lower()
+                                file_name = att.get('name', '').lower()
+                                mime_type = att.get('mime_type', '').lower()
+                                
+                                # Accept if it's explicitly a PDF or has .pdf extension
+                                is_pdf = (
+                                    'pdf' in file_type or 
+                                    file_name.endswith('.pdf') or 
+                                    'pdf' in mime_type or
+                                    'application/pdf' in mime_type
+                                )
+                                
+                                # Also check if URL contains .pdf
+                                if not is_pdf and url:
+                                    is_pdf = '.pdf' in url.lower()
+                                
+                                if is_pdf and url not in pdf_urls:
+                                    pdf_urls.append(url)
+            
+            # Check for document field in raw data
+            if 'document' in raw_data and raw_data['document']:
+                doc = raw_data['document']
+                if isinstance(doc, dict):
+                    # Try various URL fields
+                    for url_field in ['url', 'file', 'file_url', 'download_url']:
+                        if url_field in doc and doc[url_field]:
+                            url = doc[url_field]
+                            if url not in pdf_urls:
+                                pdf_urls.append(url)
+                            break
+                elif isinstance(doc, str) and doc.startswith('http'):
+                    if doc not in pdf_urls:
+                        pdf_urls.append(doc)
+            
+            # Check for files field (alternative to attachments)
+            if 'files' in raw_data:
+                files = raw_data['files']
+                if isinstance(files, list):
+                    for file_item in files:
+                        if isinstance(file_item, dict):
+                            url = file_item.get('url') or file_item.get('file') or file_item.get('file_url')
+                            if url and url not in pdf_urls:
+                                # Check if it's a PDF
+                                file_name = file_item.get('name', '').lower()
+                                if '.pdf' in file_name or file_item.get('type', '').lower() == 'pdf':
+                                    pdf_urls.append(url)
+        
+        # PRIORITY 2: Check the document field on thread object
+        if hasattr(thread, 'document') and thread.document:
+            # Document might be a URL string or JSON string
+            if isinstance(thread.document, str):
+                # Try to parse as JSON first
+                try:
+                    doc_data = json.loads(thread.document)
+                    if isinstance(doc_data, dict):
+                        # Look for URL or file fields
+                        for url_field in ['url', 'file', 'file_url', 'download_url']:
+                            if url_field in doc_data and doc_data[url_field]:
+                                if doc_data[url_field] not in pdf_urls:
+                                    pdf_urls.append(doc_data[url_field])
+                                break
+                    elif isinstance(doc_data, list):
+                        for item in doc_data:
+                            if isinstance(item, dict):
+                                for url_field in ['url', 'file', 'file_url', 'download_url']:
+                                    if url_field in item and item[url_field]:
+                                        if item[url_field] not in pdf_urls:
+                                            pdf_urls.append(item[url_field])
+                                        break
+                except (json.JSONDecodeError, TypeError):
+                    # If not JSON, might be a direct URL
+                    if thread.document.startswith('http') and thread.document not in pdf_urls:
+                        pdf_urls.append(thread.document)
+        
+        # PRIORITY 3: Check content for PDF links in HTML (these are usually embedded links, not attachments)
         if hasattr(thread, 'content') and thread.content:
             # Look for PDF links in HTML content
             pdf_link_pattern = r'href=["\']([^"\']*\.pdf[^"\']*)["\']|href=["\']([^"\']*edusercontent\.com[^"\']*)["\']'
@@ -202,59 +307,14 @@ class EdIntegration:
                 if url and url not in pdf_urls:
                     pdf_urls.append(url)
         
-        # Check the document field
-        if hasattr(thread, 'document') and thread.document:
-            # Document might be a URL string or JSON string
-            if isinstance(thread.document, str):
-                # Try to parse as JSON first
-                try:
-                    doc_data = json.loads(thread.document)
-                    if isinstance(doc_data, dict):
-                        # Look for URL or file fields
-                        if 'url' in doc_data:
-                            pdf_urls.append(doc_data['url'])
-                        elif 'file' in doc_data:
-                            pdf_urls.append(doc_data['file'])
-                    elif isinstance(doc_data, list):
-                        for item in doc_data:
-                            if isinstance(item, dict):
-                                if 'url' in item:
-                                    pdf_urls.append(item['url'])
-                                elif 'file' in item:
-                                    pdf_urls.append(item['file'])
-                except (json.JSONDecodeError, TypeError):
-                    # If not JSON, might be a direct URL
-                    if thread.document.startswith('http'):
-                        pdf_urls.append(thread.document)
-        
-        # Check the raw data for attachments
-        if hasattr(thread, '_raw') and thread._raw:
-            raw_data = thread._raw
-            # Check for attachments field
-            if 'attachments' in raw_data:
-                attachments = raw_data['attachments']
-                if isinstance(attachments, list):
-                    for att in attachments:
-                        if isinstance(att, dict):
-                            # Check if it's a PDF
-                            file_type = att.get('type', '').lower()
-                            file_name = att.get('name', '').lower()
-                            if 'pdf' in file_type or file_name.endswith('.pdf'):
-                                if 'url' in att:
-                                    pdf_urls.append(att['url'])
-                                elif 'file' in att:
-                                    pdf_urls.append(att['file'])
-            
-            # Check for document field in raw data
-            if 'document' in raw_data and raw_data['document']:
-                doc = raw_data['document']
-                if isinstance(doc, dict):
-                    if 'url' in doc:
-                        pdf_urls.append(doc['url'])
-                    elif 'file' in doc:
-                        pdf_urls.append(doc['file'])
-                elif isinstance(doc, str) and doc.startswith('http'):
-                    pdf_urls.append(doc)
+        # Also check thread.text for PDF links
+        if hasattr(thread, 'text') and thread.text:
+            pdf_link_pattern = r'href=["\']([^"\']*\.pdf[^"\']*)["\']|href=["\']([^"\']*edusercontent\.com[^"\']*)["\']'
+            matches = re.finditer(pdf_link_pattern, thread.text, re.IGNORECASE)
+            for match in matches:
+                url = match.group(1) or match.group(2)
+                if url and url not in pdf_urls:
+                    pdf_urls.append(url)
         
         # Remove duplicates while preserving order
         seen = set()
@@ -263,6 +323,11 @@ class EdIntegration:
             if url and url not in seen:
                 seen.add(url)
                 unique_urls.append(url)
+        
+        if unique_urls:
+            print(f"   📎 Found {len(unique_urls)} PDF attachment(s)")
+            for i, url in enumerate(unique_urls, 1):
+                print(f"      {i}. {url[:80]}...")
         
         return unique_urls
     
@@ -311,11 +376,29 @@ class EdIntegration:
             thread_title = thread._raw.get('title')
         thread_title = thread_title or 'Untitled'
         
-        # Handle thread content - check multiple sources
-        thread_content = getattr(thread, 'content', None)
+        # Handle thread content - prioritize thread.text for executive summary
+        # Check thread.text first (this is what should be used for executive summary)
+        thread_content = getattr(thread, 'text', None)
         if not thread_content and hasattr(thread, '_raw') and thread._raw:
-            thread_content = thread._raw.get('content')
+            thread_content = thread._raw.get('text')
+        
+        # If text is not available, try content field as fallback
+        if not thread_content:
+            thread_content = getattr(thread, 'content', None)
+            if not thread_content and hasattr(thread, '_raw') and thread._raw:
+                thread_content = thread._raw.get('content')
+        
+        # If still None, try body field
+        if not thread_content:
+            thread_content = getattr(thread, 'body', None)
+            if not thread_content and hasattr(thread, '_raw') and thread._raw:
+                thread_content = thread._raw.get('body')
+        
+        # Ensure we have content - use title as last resort
         thread_content = thread_content or ''
+        
+        # If content is HTML, we might want to strip tags or keep them
+        # For now, keep the raw content as it comes from Ed
         
         # Parse the post content
         category_name = ''
@@ -391,25 +474,45 @@ class EdIntegration:
         
         # Create EdPost object
         try:
+            # Ensure content is not None - use title as fallback only if content is truly empty
+            # But prefer to keep the actual thread.content even if it seems empty
+            if not thread_content:
+                thread_content = thread_title  # Use title as fallback if content is completely missing
+            elif isinstance(thread_content, str) and thread_content.strip() == '':
+                # Content exists but is empty string - still use it (might be intentional)
+                # Only use title if we really have no content at all
+                pass  # Keep empty string - it's valid content
+            
+            # Ensure we're using thread.text (prioritized) or thread.content as fallback
+            final_content = str(thread_content) if thread_content else thread_title
+            
+            # Debug: Print content info
+            print(f"   📄 Thread text/content extracted: {len(final_content)} characters")
+            if final_content and len(final_content) > 0:
+                print(f"   📄 Content preview: {final_content[:150]}...")
+            else:
+                print(f"   ⚠️  Warning: Thread text/content is empty, using title as fallback")
+            
             post = EdPost(
                 post_id=thread.id,
                 post_number=post_number,
                 title=thread_title,
                 author=author,
-                content=thread_content,
+                content=final_content,  # Use thread.text (prioritized) or thread.content as fallback
                 participation_type=parsed['participation_type'],
                 homework_number=parsed['homework_number'],
                 llm_agent=parsed['llm_agent'],
                 timestamp=datetime.now().isoformat(),
                 url=f"https://edstem.org/us/courses/{os.getenv('ED_COURSE_ID')}/discussion/{thread.id}",
                 category=category_name if category_name else None,
-                pdf_urls=pdf_urls if pdf_urls else None
+                pdf_urls=pdf_urls if pdf_urls else []  # Always use list, never None
             )
         except Exception as e:
             print(f"❌ Error creating EdPost object: {e}")
             print(f"   Thread ID: {thread.id}")
             print(f"   Thread title: {thread_title}")
             print(f"   Author: {author}")
+            print(f"   Content length: {len(thread_content) if thread_content else 0}")
             raise
         
         return post
@@ -523,14 +626,16 @@ class EdIntegration:
         # Print detected information
         print(f"   Author: {post.author}")
         print(f"   Post Number: {post.post_number}")
-        print(f"   Content: {post.content[:100]}..." if len(post.content) > 100 else f"   Content: {post.content}")
+        print(f"   Content length: {len(post.content) if post.content else 0} characters")
+        print(f"   Content preview: {post.content[:200] if post.content and len(post.content) > 200 else (post.content if post.content else 'No content')}...")
         if post.pdf_urls:
             print(f"   PDF Attachments: {len(post.pdf_urls)} file(s)")
             for i, pdf_url in enumerate(post.pdf_urls, 1):
                 print(f"      {i}. {pdf_url}")
         if post.participation_type:
             print(f"   Participation Type: {post.participation_type}")
-        if post.homework_number and post.homework_number != "N/A" and post.homework_number != "unknown":
+        # Handle homework_number - check explicitly for None to handle 0 correctly
+        if post.homework_number is not None and post.homework_number != "N/A" and post.homework_number != "unknown":
             print(f"   Homework: {post.homework_number}")
         elif post.homework_number == "N/A":
             print(f"   Homework: N/A")
@@ -546,7 +651,12 @@ class EdIntegration:
         
         # If this is a special participation post, also update student records
         # Only create submission if homework is not "N/A" and not "unknown"
-        if post.participation_type and post.homework_number and post.homework_number != "N/A" and post.homework_number != "unknown" and post.llm_agent:
+        # Use explicit None check to handle 0 correctly (0 is falsy but valid)
+        if (post.participation_type and 
+            post.homework_number is not None and 
+            post.homework_number != "N/A" and 
+            post.homework_number != "unknown" and 
+            post.llm_agent):
             student_data = {
                 'name': post.author,
                 'participation': post.participation_type,
@@ -735,8 +845,13 @@ class EdIntegration:
                                 await self.send_to_api('posts', asdict(post))
                                 
                                 # Also create submission if it has all required fields
-                                # Only create submission if homework is not "N/A"
-                                if post.participation_type and post.homework_number and post.homework_number != "N/A" and post.homework_number != "unknown" and post.llm_agent:
+                                # Only create submission if homework is not "N/A" and not "unknown"
+                                # Use explicit None check to handle 0 correctly (0 is falsy but valid)
+                                if (post.participation_type and 
+                                    post.homework_number is not None and 
+                                    post.homework_number != "N/A" and 
+                                    post.homework_number != "unknown" and 
+                                    post.llm_agent):
                                     student_data = {
                                         'name': post.author,
                                         'participation': post.participation_type,

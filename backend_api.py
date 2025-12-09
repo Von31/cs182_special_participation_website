@@ -39,13 +39,36 @@ class DataStore:
             # Update existing post
             self.posts.remove(existing)
         
+        # Ensure content field exists - preserve thread.content if it exists
+        # Only set a default if content is completely missing
+        if 'content' not in post_data:
+            # Content field doesn't exist at all, try to get from text or set empty
+            post_data['content'] = post_data.get('text', '') or post_data.get('body', '') or ''
+        elif post_data.get('content') is None:
+            # Content field exists but is None, try to get from text or set empty
+            post_data['content'] = post_data.get('text', '') or post_data.get('body', '') or ''
+        # If content exists (even if empty string), keep it - it's the actual thread.content
+        
+        # Ensure pdf_urls is always a list
+        if 'pdf_urls' not in post_data or post_data.get('pdf_urls') is None:
+            post_data['pdf_urls'] = []
+        elif not isinstance(post_data['pdf_urls'], list):
+            # Convert single PDF URL to list
+            post_data['pdf_urls'] = [post_data['pdf_urls']]
+        
+        # Ensure participation_type is set (use participation as fallback)
+        if 'participation_type' not in post_data or post_data.get('participation_type') is None:
+            post_data['participation_type'] = post_data.get('participation', 'A')
+        
         self.posts.append(post_data)
         
         # Update sets
         if post_data.get('author'):
             self.students.add(post_data['author'])
-        if post_data.get('homework_number'):
-            # Include "N/A" in the homeworks set
+        # Handle homework_number - need to explicitly check for None to handle 0 correctly
+        # 0 is falsy but is a valid homework number
+        if post_data.get('homework_number') is not None and post_data.get('homework_number') != '':
+            # Include all homework numbers including 0, "N/A", etc.
             self.homeworks.add(str(post_data['homework_number']))
         if post_data.get('llm_agent'):
             self.llms.add(post_data['llm_agent'])
@@ -301,25 +324,57 @@ async def get_submission(
     key = (student, homework, llm)
     submission = db.submissions.get(key)
     
-    # Find matching posts
-    matching_posts = [
-        post for post in db.posts
-        if post.get('author') == student
-        and str(post.get('homework_number')) == str(homework)
-        and post.get('llm_agent') == llm
-    ]
+    # Find matching posts - use flexible matching for homework (handle string/int conversion)
+    matching_posts = []
+    for post in db.posts:
+        post_author = post.get('author', '')
+        post_hw = post.get('homework_number')
+        post_llm = post.get('llm_agent', '')
+        
+        # Match author (case-insensitive)
+        author_match = post_author.lower() == student.lower() if post_author else False
+        
+        # Match homework (handle string/int conversion and 0)
+        hw_match = False
+        if post_hw is not None:
+            # Convert both to strings for comparison
+            post_hw_str = str(post_hw)
+            homework_str = str(homework)
+            hw_match = post_hw_str == homework_str
+        
+        # Match LLM (case-insensitive)
+        llm_match = post_llm.lower() == llm.lower() if post_llm else False
+        
+        if author_match and hw_match and llm_match:
+            matching_posts.append(post)
     
     # Get PDF URLs from posts
     pdf_urls = []
     for post in matching_posts:
-        if post.get('pdf_urls'):
-            if isinstance(post['pdf_urls'], list):
-                pdf_urls.extend(post['pdf_urls'])
+        post_pdfs = post.get('pdf_urls')
+        if post_pdfs:
+            if isinstance(post_pdfs, list):
+                pdf_urls.extend([url for url in post_pdfs if url])
             else:
-                pdf_urls.append(post['pdf_urls'])
+                if post_pdfs:
+                    pdf_urls.append(post_pdfs)
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_pdf_urls = []
+    for url in pdf_urls:
+        if url and url not in seen:
+            seen.add(url)
+            unique_pdf_urls.append(url)
+    pdf_urls = unique_pdf_urls
     
     # Generate summary from post contents
-    summary = generate_executive_summary(matching_posts)
+    # If we have matching posts, use their content; otherwise generate a summary
+    if matching_posts:
+        summary = generate_executive_summary(matching_posts)
+    else:
+        # If no matching posts, create a simple message
+        summary = f"No posts found for {student} on Homework {homework} using {llm}."
     
     # Use first PDF URL if available
     pdf_url = pdf_urls[0] if pdf_urls else None
@@ -366,7 +421,7 @@ async def get_posts(
         hw_list = [h.strip() for h in homeworks.split(',')]
         filtered_posts = [
             p for p in filtered_posts 
-            if p.get('homework_number') and 
+            if p.get('homework_number') is not None and 
             str(p.get('homework_number')) in hw_list
         ]
     
@@ -377,18 +432,27 @@ async def get_posts(
     # Format for frontend - include all fields
     result = []
     for post in filtered_posts:
+        # Prioritize content field - this comes from thread.content
+        post_content = post.get('content', '')
+        # Only use fallbacks if content is truly missing
+        if not post_content or (isinstance(post_content, str) and post_content.strip() == ''):
+            post_content = post.get('text', '') or post.get('body', '') or ''
+        
         result.append({
             "post_id": post.get('post_id'),
             "post_number": post.get('post_number'),
             "title": post.get('title', 'Untitled'),
             "author": post.get('author', 'Unknown'),
-            "participation": post.get('participation_type', 'A'),
-            "content": post.get('content', ''),
-            "excerpt": post.get('content', '')[:150] + '...' if len(post.get('content', '')) > 150 else post.get('content', ''),
+            "participation_type": post.get('participation_type', 'A'),  # Use participation_type consistently
+            "participation": post.get('participation_type', 'A'),  # Keep for backward compatibility
+            "content": post_content,  # This is the thread.content from Ed
+            "text": post_content,  # Add text field as alias
+            "body": post_content,  # Add body field as alias
+            "excerpt": post_content[:150] + '...' if len(post_content) > 150 else post_content,
             "homework_number": post.get('homework_number'),
             "llm_agent": post.get('llm_agent'),
             "url": post.get('url', '#'),
-            "pdf_urls": post.get('pdf_urls', []),
+            "pdf_urls": post.get('pdf_urls') or [],  # Ensure it's always a list
             "timestamp": post.get('timestamp', ''),
             "category": post.get('category')
         })
