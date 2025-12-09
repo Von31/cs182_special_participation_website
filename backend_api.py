@@ -5,8 +5,8 @@ This provides the API endpoints that your frontend expects
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional, Dict
+from pydantic import BaseModel, validator
+from typing import List, Optional, Dict, Union, Any
 from datetime import datetime
 import json
 
@@ -45,6 +45,7 @@ class DataStore:
         if post_data.get('author'):
             self.students.add(post_data['author'])
         if post_data.get('homework_number'):
+            # Include "N/A" in the homeworks set
             self.homeworks.add(str(post_data['homework_number']))
         if post_data.get('llm_agent'):
             self.llms.add(post_data['llm_agent'])
@@ -72,16 +73,69 @@ db = DataStore()
 
 # Pydantic models
 class Post(BaseModel):
+    class Config:
+        # Allow arbitrary types to be validated by validators
+        arbitrary_types_allowed = True
+    
     post_id: int
+    post_number: Optional[int] = None  # Post number from Ed
     title: str
     author: str
     content: str
     participation_type: Optional[str] = None
-    homework_number: Optional[int] = None
+    homework_number: Optional[Any] = None  # Can be int or "N/A" - using Any to allow validator to handle it
     llm_agent: Optional[str] = None
     timestamp: str
     url: str
     category: Optional[str] = None
+    pdf_urls: Optional[List[str]] = None  # List of PDF/document URLs
+    
+    @validator('homework_number', pre=True, always=True)
+    def validate_homework_number(cls, v):
+        """Accept int, "N/A", "unknown", or None for homework_number"""
+        # Handle None
+        if v is None:
+            return None
+        
+        # Handle int - return as is
+        if isinstance(v, int):
+            return v
+        
+        # Handle string
+        if isinstance(v, str):
+            v_stripped = v.strip()
+            v_lower = v_stripped.lower()
+            v_upper = v_stripped.upper()
+            # Check for N/A variations
+            if v_upper == "N/A" or v_upper == "NA":
+                return "N/A"
+            # Check for unknown variations
+            if v_lower == "unknown" or v_lower == "unk":
+                return "unknown"
+            # Empty string defaults to "unknown"
+            if v_stripped == "":
+                return "unknown"
+            # Try to convert numeric string to int
+            try:
+                return int(v_stripped)
+            except (ValueError, TypeError):
+                # If conversion fails, return "unknown"
+                return "unknown"
+        
+        # For any other type, try to convert to string first
+        try:
+            v_str = str(v).strip()
+            v_lower = v_str.lower()
+            v_upper = v_str.upper()
+            if v_upper == "N/A" or v_upper == "NA":
+                return "N/A"
+            if v_lower == "unknown" or v_lower == "unk":
+                return "unknown"
+            if v_str == "":
+                return "unknown"
+            return int(v_str)
+        except (ValueError, TypeError):
+            return "unknown"
 
 
 class Submission(BaseModel):
@@ -123,7 +177,8 @@ async def root():
             "students": len(db.students),
             "homeworks": len(db.homeworks),
             "llms": len(db.llms)
-        }
+        },
+        "message": "If posts count is 0, make sure ed_integration.py is running and has received posts from Ed"
     }
 
 
@@ -185,33 +240,107 @@ async def get_llms():
     return llms
 
 
+def generate_executive_summary(posts):
+    """Generate an executive summary from post contents"""
+    if not posts:
+        return "No posts available to generate summary."
+    
+    # Combine all post contents
+    all_content = " ".join([post.get('content', '') for post in posts if post.get('content')])
+    
+    if not all_content:
+        return "No content available in posts to generate summary."
+    
+    # Simple summary generation (in production, use AI/LLM for better summaries)
+    word_count = len(all_content.split())
+    char_count = len(all_content)
+    
+    # Extract key information
+    authors = set([post.get('author', 'Unknown') for post in posts])
+    homeworks = set([str(post.get('homework_number', 'N/A')) for post in posts if post.get('homework_number')])
+    llms = set([post.get('llm_agent', 'N/A') for post in posts if post.get('llm_agent')])
+    participation_types = set([post.get('participation_type', 'N/A') for post in posts if post.get('participation_type')])
+    
+    # Generate summary
+    summary = f"Executive Summary\n"
+    summary += f"{'='*50}\n\n"
+    summary += f"Overview:\n"
+    summary += f"- Total Posts Analyzed: {len(posts)}\n"
+    summary += f"- Total Content Length: {word_count:,} words, {char_count:,} characters\n"
+    summary += f"- Authors: {', '.join(sorted(authors))}\n"
+    summary += f"- Homework Assignments: {', '.join(sorted(homeworks, key=lambda x: int(x) if x.isdigit() else 0))}\n"
+    summary += f"- LLM Agents Used: {', '.join(sorted(llms))}\n"
+    summary += f"- Participation Types: {', '.join(sorted(participation_types))}\n\n"
+    
+    summary += f"Content Analysis:\n"
+    # Extract first few sentences as key points
+    sentences = all_content.split('.')[:5]
+    summary += f"- Key Points: {' '.join([s.strip() for s in sentences if s.strip()])}\n\n"
+    
+    summary += f"Details:\n"
+    for i, post in enumerate(posts[:3], 1):  # Summarize first 3 posts
+        title = post.get('title', 'Untitled')
+        author = post.get('author', 'Unknown')
+        content_preview = post.get('content', '')[:200] + '...' if len(post.get('content', '')) > 200 else post.get('content', '')
+        summary += f"{i}. {title} by {author}\n"
+        summary += f"   {content_preview}\n\n"
+    
+    if len(posts) > 3:
+        summary += f"... and {len(posts) - 3} more post(s)\n"
+    
+    return summary
+
+
 @app.get("/api/submissions")
 async def get_submission(
     student: str = Query(..., description="Student name"),
     homework: str = Query(..., description="Homework number"),
     llm: str = Query(..., description="LLM agent name")
 ):
-    """Get a specific submission"""
+    """Get a specific submission - generates summary from posts"""
     key = (student, homework, llm)
     submission = db.submissions.get(key)
     
-    if not submission:
-        # Return mock data for demo purposes
-        return {
-            "summary": f"Executive Summary for {student}'s Homework {homework} using {llm}:\n\n"
-                      f"This is a placeholder summary. In production, this would contain:\n"
-                      f"- Code quality analysis\n"
-                      f"- Implementation approach\n"
-                      f"- LLM agent interaction details\n"
-                      f"- Performance metrics\n"
-                      f"- Areas of improvement",
-            "pdfUrl": None,
-            "student": student,
-            "homework": homework,
-            "llm": llm
-        }
+    # Find matching posts
+    matching_posts = [
+        post for post in db.posts
+        if post.get('author') == student
+        and str(post.get('homework_number')) == str(homework)
+        and post.get('llm_agent') == llm
+    ]
     
-    return submission
+    # Get PDF URLs from posts
+    pdf_urls = []
+    for post in matching_posts:
+        if post.get('pdf_urls'):
+            if isinstance(post['pdf_urls'], list):
+                pdf_urls.extend(post['pdf_urls'])
+            else:
+                pdf_urls.append(post['pdf_urls'])
+    
+    # Generate summary from post contents
+    summary = generate_executive_summary(matching_posts)
+    
+    # Use first PDF URL if available
+    pdf_url = pdf_urls[0] if pdf_urls else None
+    
+    result = {
+        "summary": summary,
+        "pdfUrl": pdf_url,
+        "pdfUrls": pdf_urls,  # All PDF URLs
+        "student": student,
+        "homework": homework,
+        "llm": llm,
+        "post_count": len(matching_posts)
+    }
+    
+    # Merge with submission data if exists
+    if submission:
+        result.update(submission)
+        if not result.get('summary'):
+            result['summary'] = summary
+    
+    return result
 
 
 @app.get("/api/posts")
@@ -235,22 +364,33 @@ async def get_posts(
     
     if homeworks:
         hw_list = [h.strip() for h in homeworks.split(',')]
-        filtered_posts = [p for p in filtered_posts if str(p.get('homework_number')) in hw_list]
+        filtered_posts = [
+            p for p in filtered_posts 
+            if p.get('homework_number') and 
+            str(p.get('homework_number')) in hw_list
+        ]
     
     if llms:
         llm_list = [l.strip() for l in llms.split(',')]
         filtered_posts = [p for p in filtered_posts if p.get('llm_agent') in llm_list]
     
-    # Format for frontend
+    # Format for frontend - include all fields
     result = []
     for post in filtered_posts:
         result.append({
+            "post_id": post.get('post_id'),
+            "post_number": post.get('post_number'),
             "title": post.get('title', 'Untitled'),
             "author": post.get('author', 'Unknown'),
             "participation": post.get('participation_type', 'A'),
-            "content": post.get('content', '')[:200] + '...' if len(post.get('content', '')) > 200 else post.get('content', ''),
+            "content": post.get('content', ''),
             "excerpt": post.get('content', '')[:150] + '...' if len(post.get('content', '')) > 150 else post.get('content', ''),
-            "url": post.get('url', '#')
+            "homework_number": post.get('homework_number'),
+            "llm_agent": post.get('llm_agent'),
+            "url": post.get('url', '#'),
+            "pdf_urls": post.get('pdf_urls', []),
+            "timestamp": post.get('timestamp', ''),
+            "category": post.get('category')
         })
     
     return result
@@ -286,7 +426,10 @@ async def get_sentiment(
 @app.post("/api/posts")
 async def create_post(post: Post):
     """Create a new post (called by Ed integration)"""
-    db.add_post(post.dict())
+    # Convert post to dict and handle "N/A" for homework_number
+    post_dict = post.dict()
+    # Keep "N/A" as string if that's what was sent
+    db.add_post(post_dict)
     return {"status": "success", "post_id": post.post_id}
 
 

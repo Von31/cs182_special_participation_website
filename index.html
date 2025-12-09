@@ -368,6 +368,9 @@
         .summary-text {
             line-height: 1.8;
             color: #495057;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
         }
 
         .pdf-viewer {
@@ -512,6 +515,10 @@
             background: #cce5ff;
         }
 
+        .participation-badge.e {
+            background: #e5ccff;
+        }
+
         .post-excerpt {
             color: #495057;
             line-height: 1.6;
@@ -571,6 +578,10 @@
                             <div class="dropdown-item">
                                 <input type="checkbox" id="participation_d" value="D" onchange="updateDisplay('participation')">
                                 <label for="participation_d">Participation D</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="participation_e" value="E" onchange="updateDisplay('participation')">
+                                <label for="participation_e">Participation E</label>
                             </div>
                         </div>
                     </div>
@@ -953,12 +964,24 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('summary')">Executive Summary & PDF</button>
-            <button class="tab" onclick="switchTab('analysis')">Word Cloud & Sentiment Analysis</button>
+            <button class="tab active" onclick="switchTab('posts')">Posts</button>
+            <button class="tab" onclick="switchTab('summary')">Executive Summary & PDF</button>
+            <button class="tab" onclick="switchTab('wordcloud')">Word Cloud & Sentiment</button>
         </div>
 
         <div class="content">
-            <div id="summaryTab" class="tab-content active">
+            <div id="postsTab" class="tab-content active">
+                <div class="filter-note">
+                    Select participation type, students, homework assignments, and LLM agents above, then click Search to view posts
+                </div>
+
+                <h3 style="margin-bottom: 20px; color: #003262;">Posts</h3>
+                <div class="posts-grid" id="postsGrid">
+                    <p class="placeholder">Select filters above and click Search to see posts</p>
+                </div>
+            </div>
+
+            <div id="summaryTab" class="tab-content">
                 <div class="summary-view">
                     <div class="summary-card">
                         <h3>Executive Summary</h3>
@@ -978,20 +1001,15 @@
                 </div>
             </div>
 
-            <div id="analysisTab" class="tab-content">
+            <div id="wordcloudTab" class="tab-content">
                 <div class="filter-note">
-                    Select participation type, students, homework assignments, and LLM agents above, then click Search to generate analysis
+                    Select participation type, students, homework assignments, and LLM agents above, then click Search to generate word cloud and sentiment analysis
                 </div>
 
-                <h3 style="margin-bottom: 20px; color: #003262;">Posts</h3>
-                <div class="posts-grid" id="postsGrid">
-                    <p class="placeholder">Select filters above and click Search to see posts</p>
-                </div>
-
-                <h3 style="margin-bottom: 20px; margin-top: 40px; color: #003262;">Word Cloud</h3>
+                <h3 style="margin-bottom: 20px; color: #003262;">Word Cloud</h3>
                 <div id="wordcloud"></div>
                 
-                <h3 style="margin-bottom: 20px; color: #003262;">Sentiment Analysis by LLM Agent</h3>
+                <h3 style="margin-bottom: 20px; margin-top: 40px; color: #003262;">Sentiment Analysis by LLM Agent</h3>
                 <div class="sentiment-grid" id="sentimentGrid">
                     <p class="placeholder">Select filters above and click Search to see analysis</p>
                 </div>
@@ -1001,7 +1019,7 @@
 
     <script>
         // API Configuration
-        const API_BASE_URL = 'http://localhost:8000/api'; // Change this to your API endpoint
+        const API_BASE_URL = 'http://localhost:8320/api'; // Change this to your API endpoint
         
         // Global data storage
         let studentsData = [];
@@ -1140,9 +1158,21 @@
                 item.className = 'dropdown-item';
                 item.setAttribute('data-student', hw.students.join(','));
                 item.setAttribute('data-llm', hw.llms.join(','));
+                let displayText;
+                let safeId;
+                if (hw.number === 'N/A' || hw.number === 'n/a') {
+                    displayText = 'N/A';
+                    safeId = 'hw_na';
+                } else if (hw.number === 'unknown' || hw.number === 'Unknown') {
+                    displayText = 'unknown';
+                    safeId = 'hw_unknown';
+                } else {
+                    displayText = `Homework ${hw.number}`;
+                    safeId = `hw_${hw.number}`;
+                }
                 item.innerHTML = `
-                    <input type="checkbox" id="hw_${hw.number}" value="${hw.number}" onchange="updateDisplay('homework')">
-                    <label for="hw_${hw.number}">Homework ${hw.number}</label>
+                    <input type="checkbox" id="${safeId}" value="${hw.number}" onchange="updateDisplay('homework')">
+                    <label for="${safeId}">${displayText}</label>
                 `;
                 container.appendChild(item);
             });
@@ -1167,18 +1197,189 @@
             });
         }
 
+        // Populate dropdowns from posts data
+        async function populateDropdownsFromPosts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/posts`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const posts = await response.json();
+                
+                // Store posts globally for filtering
+                postsData = posts;
+                
+                console.log(`Fetched ${posts.length} posts from API`);
+                
+                if (!posts || posts.length === 0) {
+                    console.warn('No posts found in database. Make sure ed_integration.py is running and has processed some posts.');
+                    // Show a message to the user
+                    const studentContainer = document.getElementById('studentDropdownItems');
+                    if (studentContainer) {
+                        studentContainer.innerHTML = `
+                            <div class="error-message" style="margin: 10px;">
+                                <p>No posts found in database.</p>
+                                <p style="font-size: 12px; margin-top: 5px;">
+                                    Make sure:<br>
+                                    1. ed_integration.py is running<br>
+                                    2. It has connected to Ed and received some posts<br>
+                                    3. The backend API is running on port 8320
+                                </p>
+                            </div>
+                        `;
+                    }
+                    // Still try to fetch from other endpoints as fallback
+                    await Promise.all([
+                        fetchStudents(),
+                        fetchHomeworks(),
+                        fetchLLMs()
+                    ]);
+                    return;
+                }
+                
+                // Extract unique values from posts
+                const studentsSet = new Set();
+                const homeworksSet = new Set();
+                const llmsSet = new Set();
+                
+                posts.forEach(post => {
+                    if (post.author && post.author !== 'Unknown') {
+                        studentsSet.add(post.author);
+                    }
+                    // Check for homework_number - need to handle 0, "N/A", "unknown", and other values
+                    if (post.homework_number !== null && post.homework_number !== undefined && post.homework_number !== '') {
+                        homeworksSet.add(String(post.homework_number));
+                    }
+                    if (post.llm_agent && post.llm_agent !== 'Unknown') {
+                        llmsSet.add(post.llm_agent);
+                    }
+                });
+                
+                console.log(`Found ${studentsSet.size} students, ${homeworksSet.size} homeworks, ${llmsSet.size} LLMs`);
+                
+                // Populate dropdowns
+                const students = Array.from(studentsSet).sort();
+                // Sort homeworks: numeric values first, then "unknown", then "N/A" at the end
+                const homeworks = Array.from(homeworksSet).sort((a, b) => {
+                    // N/A goes to very end
+                    if (a === 'N/A' || a === 'n/a') return 1;
+                    if (b === 'N/A' || b === 'n/a') return -1;
+                    // "unknown" goes before N/A but after numbers
+                    if (a === 'unknown' || a === 'Unknown') return 1;
+                    if (b === 'unknown' || b === 'Unknown') return -1;
+                    const numA = parseInt(a);
+                    const numB = parseInt(b);
+                    if (isNaN(numA) && isNaN(numB)) return a.localeCompare(b);
+                    if (isNaN(numA)) return 1;
+                    if (isNaN(numB)) return -1;
+                    return numA - numB;
+                });
+                const llms = Array.from(llmsSet).sort();
+                
+                populateStudentDropdown(students.map(name => ({name})));
+                populateHomeworkDropdown(homeworks.map(num => ({
+                    number: num,
+                    students: posts.filter(p => String(p.homework_number) === num && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
+                    llms: posts.filter(p => String(p.homework_number) === num && p.llm_agent && p.llm_agent !== 'Unknown').map(p => p.llm_agent).filter(Boolean)
+                })));
+                populateLLMDropdown(llms.map(name => ({
+                    name: name,
+                    students: posts.filter(p => p.llm_agent === name && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
+                    homeworks: posts.filter(p => p.llm_agent === name && p.homework_number).map(p => String(p.homework_number)).filter(Boolean)
+                })));
+                
+                // Also update global data
+                studentsData = students.map(name => ({name}));
+                homeworksData = homeworks.map(num => ({
+                    number: num,
+                    students: posts.filter(p => String(p.homework_number) === num && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
+                    llms: posts.filter(p => String(p.homework_number) === num && p.llm_agent && p.llm_agent !== 'Unknown').map(p => p.llm_agent).filter(Boolean)
+                }));
+                llmsData = llms.map(name => ({
+                    name: name,
+                    students: posts.filter(p => p.llm_agent === name && p.author && p.author !== 'Unknown').map(p => p.author).filter(Boolean),
+                    homeworks: posts.filter(p => p.llm_agent === name && p.homework_number).map(p => String(p.homework_number)).filter(Boolean)
+                }));
+                
+                filterDropdowns();
+            } catch (error) {
+                console.error('Error populating from posts:', error);
+                // Show error message
+                const studentContainer = document.getElementById('studentDropdownItems');
+                if (studentContainer) {
+                    studentContainer.innerHTML = `
+                        <div class="error-message" style="margin: 10px;">
+                            <p>Error connecting to API: ${error.message}</p>
+                            <p style="font-size: 12px; margin-top: 5px;">
+                                Check that the backend API is running at ${API_BASE_URL}
+                            </p>
+                        </div>
+                    `;
+                }
+                // Fallback to API endpoints
+                try {
+                    await Promise.all([
+                        fetchStudents(),
+                        fetchHomeworks(),
+                        fetchLLMs()
+                    ]);
+                } catch (fallbackError) {
+                    console.error('Fallback also failed:', fallbackError);
+                }
+                filterDropdowns();
+            }
+        }
+
+        // Check API health
+        async function checkAPIHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL.replace('/api', '')}/`);
+                if (!response.ok) throw new Error('API not responding');
+                const data = await response.json();
+                console.log('API Health:', data);
+                if (data.stats && data.stats.posts === 0) {
+                    console.warn('⚠️  No posts in database. Make sure ed_integration.py is running and has received posts.');
+                }
+                return data;
+            } catch (error) {
+                console.error('❌ API Health Check Failed:', error);
+                return null;
+            }
+        }
+
         // Initialize data on page load
         async function initializeData() {
-            await Promise.all([
-                fetchStudents(),
-                fetchHomeworks(),
-                fetchLLMs()
-            ]);
-            filterDropdowns();
+            // Check API health first
+            const health = await checkAPIHealth();
+            if (!health) {
+                const studentContainer = document.getElementById('studentDropdownItems');
+                if (studentContainer) {
+                    studentContainer.innerHTML = `
+                        <div class="error-message" style="margin: 10px;">
+                            <p><strong>Cannot connect to API</strong></p>
+                            <p style="font-size: 12px; margin-top: 5px;">
+                                Make sure the backend API is running:<br>
+                                <code>python backend_api.py</code><br><br>
+                                Expected URL: ${API_BASE_URL.replace('/api', '')}
+                            </p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+            
+            // Try to populate from posts first, fallback to API endpoints
+            await populateDropdownsFromPosts();
         }
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initializeData);
+        
+        // Refresh data every 30 seconds to get new posts
+        setInterval(async () => {
+            console.log('Refreshing data from posts...');
+            await populateDropdownsFromPosts();
+        }, 30000);
 
         function toggleDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
@@ -1335,19 +1536,44 @@
             const selectedHomework = getSelectedValues('homework');
             const selectedLLMs = getSelectedValues('llm');
 
+            // Use posts data for filtering - this is the source of truth
+            const allPosts = postsData.length > 0 ? postsData : [];
+            
+            // Helper function to check if a post matches current filters
+            function postMatchesFilters(post, student = null, homework = null, llm = null) {
+                const matchesStudent = !student || (post.author && post.author === student);
+                const matchesHw = !homework || String(post.homework_number || '') === String(homework);
+                const matchesLLM = !llm || (post.llm_agent && post.llm_agent === llm);
+                return matchesStudent && matchesHw && matchesLLM;
+            }
+            
+            // Helper function to check if there are any posts matching the current selection
+            function hasMatchingPosts(student = null, homework = null, llm = null) {
+                if (allPosts.length === 0) return true; // If no posts data, show all
+                return allPosts.some(post => postMatchesFilters(post, student, homework, llm));
+            }
+            
+            // Filter Homework dropdown
             document.querySelectorAll('#homeworkDropdown .dropdown-item').forEach(item => {
-                const hwStudents = item.dataset.student ? item.dataset.student.split(',') : [];
-                const hwLLMs = item.dataset.llm ? item.dataset.llm.split(',') : [];
-                
+                const hwValue = item.querySelector('input').value;
                 let show = true;
-                if (selectedStudents.length > 0) {
-                    show = show && hwStudents.some(s => selectedStudents.includes(s));
-                }
-                if (selectedLLMs.length > 0) {
-                    show = show && hwLLMs.some(l => selectedLLMs.includes(l));
+                
+                // Check if any posts match this homework with selected students/LLMs
+                if (selectedStudents.length > 0 || selectedLLMs.length > 0) {
+                    show = false;
+                    // Check if any selected student + this homework + any selected LLM has a matching post
+                    for (const student of selectedStudents.length > 0 ? selectedStudents : [null]) {
+                        for (const llm of selectedLLMs.length > 0 ? selectedLLMs : [null]) {
+                            if (hasMatchingPosts(student, hwValue, llm)) {
+                                show = true;
+                                break;
+                            }
+                        }
+                        if (show) break;
+                    }
                 }
 
-                if (!show) {
+                if (!show && (selectedStudents.length > 0 || selectedLLMs.length > 0)) {
                     item.classList.add('disabled');
                     item.querySelector('input').disabled = true;
                 } else {
@@ -1356,23 +1582,25 @@
                 }
             });
 
+            // Filter Student dropdown
             document.querySelectorAll('#studentDropdown .dropdown-item').forEach(item => {
                 const student = item.querySelector('input').value;
-                let show = false;
-
-                document.querySelectorAll('#homeworkDropdown .dropdown-item').forEach(hwItem => {
-                    const hwStudents = hwItem.dataset.student ? hwItem.dataset.student.split(',') : [];
-                    const hw = hwItem.querySelector('input').value;
-                    
-                    if (hwStudents.includes(student)) {
-                        if (selectedHomework.length === 0 || selectedHomework.includes(hw)) {
-                            const hwLLMs = hwItem.dataset.llm ? hwItem.dataset.llm.split(',') : [];
-                            if (selectedLLMs.length === 0 || hwLLMs.some(l => selectedLLMs.includes(l))) {
+                let show = true;
+                
+                // Check if any posts match this student with selected homeworks/LLMs
+                if (selectedHomework.length > 0 || selectedLLMs.length > 0) {
+                    show = false;
+                    // Check if this student + any selected homework + any selected LLM has a matching post
+                    for (const hw of selectedHomework.length > 0 ? selectedHomework : [null]) {
+                        for (const llm of selectedLLMs.length > 0 ? selectedLLMs : [null]) {
+                            if (hasMatchingPosts(student, hw, llm)) {
                                 show = true;
+                                break;
                             }
                         }
+                        if (show) break;
                     }
-                });
+                }
 
                 if (!show && (selectedHomework.length > 0 || selectedLLMs.length > 0)) {
                     item.classList.add('disabled');
@@ -1383,23 +1611,27 @@
                 }
             });
 
+            // Filter LLM dropdown
             document.querySelectorAll('#llmDropdown .dropdown-item').forEach(item => {
-                const llmStudents = item.dataset.student ? item.dataset.student.split(',').map(s => s.trim()) : [];
-                const llmHomeworks = item.dataset.homework ? item.dataset.homework.split(',').map(h => h.trim()) : [];
-                
+                const llm = item.querySelector('input').value;
                 let show = true;
                 
-                // If students are selected, check if any of them are associated with this LLM
-                if (selectedStudents.length > 0) {
-                    show = show && llmStudents.some(s => selectedStudents.includes(s));
-                }
-                
-                // If homeworks are selected, check if any of them are associated with this LLM
-                if (selectedHomework.length > 0) {
-                    show = show && llmHomeworks.some(h => selectedHomework.includes(h));
+                // Check if any posts match this LLM with selected students/homeworks
+                if (selectedStudents.length > 0 || selectedHomework.length > 0) {
+                    show = false;
+                    // Check if any selected student + any selected homework + this LLM has a matching post
+                    for (const student of selectedStudents.length > 0 ? selectedStudents : [null]) {
+                        for (const hw of selectedHomework.length > 0 ? selectedHomework : [null]) {
+                            if (hasMatchingPosts(student, hw, llm)) {
+                                show = true;
+                                break;
+                            }
+                        }
+                        if (show) break;
+                    }
                 }
 
-                if (!show && (selectedHomework.length > 0 || selectedStudents.length > 0)) {
+                if (!show && (selectedStudents.length > 0 || selectedHomework.length > 0)) {
                     item.classList.add('disabled');
                     item.querySelector('input').disabled = true;
                 } else {
@@ -1427,12 +1659,17 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
-            if (tabName === 'summary') {
-                document.querySelector('.tab:first-child').classList.add('active');
+            // Activate the clicked tab button
+            const tabs = document.querySelectorAll('.tab');
+            if (tabName === 'posts') {
+                tabs[0].classList.add('active');
+                document.getElementById('postsTab').classList.add('active');
+            } else if (tabName === 'summary') {
+                tabs[1].classList.add('active');
                 document.getElementById('summaryTab').classList.add('active');
-            } else {
-                document.querySelector('.tab:last-child').classList.add('active');
-                document.getElementById('analysisTab').classList.add('active');
+            } else if (tabName === 'wordcloud') {
+                tabs[2].classList.add('active');
+                document.getElementById('wordcloudTab').classList.add('active');
             }
         }
 
@@ -1441,7 +1678,9 @@
             
             if (activeTab.includes('Executive Summary')) {
                 searchSubmission();
-            } else {
+            } else if (activeTab.includes('Posts')) {
+                applyFilters();
+            } else if (activeTab.includes('Word Cloud')) {
                 applyFilters();
             }
         }
@@ -1467,11 +1706,29 @@
             const data = await fetchSubmission(student, homework, llm);
 
             if (data && data.summary) {
-                document.getElementById('summaryText').innerHTML = `<p>${data.summary}</p>`;
-                if (data.pdfUrl) {
-                    document.getElementById('pdfViewer').innerHTML = `
-                        <iframe src="${data.pdfUrl}" width="100%" height="600px" style="border: none;"></iframe>
-                    `;
+                // Format summary with line breaks
+                const formattedSummary = data.summary.replace(/\n/g, '<br>');
+                document.getElementById('summaryText').innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8;">${formattedSummary}</div>`;
+                
+                // Handle PDF display
+                const pdfUrls = data.pdfUrls || (data.pdfUrl ? [data.pdfUrl] : []);
+                if (pdfUrls.length > 0) {
+                    let pdfHtml = '';
+                    if (pdfUrls.length === 1) {
+                        pdfHtml = `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                    } else {
+                        pdfHtml = '<div style="margin-bottom: 15px;">';
+                        pdfUrls.forEach((url, index) => {
+                            pdfHtml += `<div style="margin-bottom: 10px;">
+                                <a href="${url}" target="_blank" style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: #f8f9fa; border-radius: 4px; display: inline-block;">
+                                    PDF ${index + 1}
+                                </a>
+                            </div>`;
+                        });
+                        pdfHtml += '</div>';
+                        pdfHtml += `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                    }
+                    document.getElementById('pdfViewer').innerHTML = pdfHtml;
                 } else {
                     document.getElementById('pdfViewer').innerHTML = `
                         <div style="text-align: center;">
@@ -1479,7 +1736,7 @@
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
-                            <p style="color: #003262; font-weight: 600; margin-top: 10px;">Annotated Code PDF</p>
+                            <p style="color: #003262; font-weight: 600; margin-top: 10px;">No PDF Available</p>
                             <p style="color: #6c757d; font-size: 14px;">${student} - Homework ${homework} - ${llm}</p>
                         </div>
                     `;
@@ -1512,15 +1769,22 @@
                 return;
             }
 
-            // Fetch and display posts
-            const posts = await fetchPosts(participation, students, homeworks, llms);
-            displayPosts(posts);
-
-            generateWordCloud(students, homeworks, llms);
+            const activeTab = document.querySelector('.tab.active').textContent.trim();
             
-            // Fetch sentiment data from API
-            const sentiment = await fetchSentimentAnalysis(students, homeworks, llms);
-            displaySentiment(llms, sentiment);
+            // Always fetch posts (needed for both tabs)
+            const posts = await fetchPosts(participation, students, homeworks, llms);
+            
+            // Display posts if on Posts tab
+            if (activeTab.includes('Posts')) {
+                displayPosts(posts);
+            }
+            
+            // Generate word cloud and sentiment if on Word Cloud tab
+            if (activeTab.includes('Word Cloud')) {
+                generateWordCloud(students, homeworks, llms);
+                const sentiment = await fetchSentimentAnalysis(students, homeworks, llms);
+                displaySentiment(llms, sentiment);
+            }
         }
 
         function displayPosts(posts) {
@@ -1538,20 +1802,36 @@
                 const card = document.createElement('div');
                 card.className = 'post-card';
                 card.onclick = () => {
-                    // Handle post click - could open modal or navigate
+                    // Handle post click - show full content
                     console.log('Post clicked:', post);
+                    if (post.url) {
+                        window.open(post.url, '_blank');
+                    }
                 };
                 
                 const participationClass = post.participation ? post.participation.toLowerCase() : 'a';
                 const participationLabel = post.participation || 'A';
+                
+                // Build metadata string
+                let metaInfo = [];
+                if (post.post_number) metaInfo.push(`Post #${post.post_number}`);
+                if (post.homework_number) metaInfo.push(`HW ${post.homework_number}`);
+                if (post.llm_agent) metaInfo.push(post.llm_agent);
+                
+                // Check for PDFs
+                const pdfUrls = post.pdf_urls || [];
+                const hasPdf = pdfUrls.length > 0;
                 
                 card.innerHTML = `
                     <h3>${post.title || 'Untitled Post'}</h3>
                     <div class="post-meta">
                         <p class="post-author">${post.author || 'Unknown'}</p>
                         <p class="participation-badge ${participationClass}">Participation ${participationLabel}</p>
+                        ${hasPdf ? '<span style="color: #28a745; font-size: 12px; font-weight: 600;">📄 PDF</span>' : ''}
                     </div>
+                    ${metaInfo.length > 0 ? `<p style="color: #6c757d; font-size: 12px; margin-bottom: 8px;">${metaInfo.join(' • ')}</p>` : ''}
                     <p class="post-excerpt">${post.excerpt || post.content || 'No content available.'}</p>
+                    ${post.url ? `<a href="${post.url}" target="_blank" style="color: #003262; font-size: 12px; text-decoration: none; margin-top: 8px; display: inline-block;">View on Ed →</a>` : ''}
                 `;
                 grid.appendChild(card);
             });
