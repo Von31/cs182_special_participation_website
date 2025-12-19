@@ -58,6 +58,8 @@ class EdParticipationParser:
         'Claude': r'\bclaude\b',
         'ChatGPT': r'\bchatgpt\b|\bgpt-4\b|\bgpt\s*4\b',
         'GPT-3.5': r'\bgpt-3\.5\b|\bgpt\s*3\.5\b',
+        'GPT-4o': r'\bgpt-4o\b|\bgpt\s*4o\b',
+        'GPT-5.1': r'\bgpt-5\.1\b|\bgpt\s*5\.1\b',
         'Gemini': r'\bgemini\b',
         'LLaMA': r'\bllama\b',
         'Mistral': r'\bmistral\b',
@@ -68,7 +70,10 @@ class EdParticipationParser:
         'DeepSeek': r'\bdeepseek\b',
         'Windsurf': r'\bwindsurf\b',
         'Perplexity': r'\bperplexity\b',
-        'Cursor': r'\bcursor\b'
+        'Cursor': r'\bcursor\b',
+        'Nano Banana': r'\bnano banana\b',
+        'GPT-Oss': r'\bgpt-oss\b',
+        'Gemini Opus': r'\bopus\b'
         
     }
     
