@@ -524,56 +524,12 @@ async def update_post(post_id: int, post: Post):
     return {"status": "success", "post_id": post_id}
 
 
-# Add some initial demo data
 @app.on_event("startup")
 async def startup_event():
-    """Add demo data on startup"""
-    demo_posts = [
-        {
-            "post_id": 1,
-            "title": "Participation A - HW1 using Claude",
-            "author": "Alice Johnson",
-            "content": "I used Claude to help debug my implementation...",
-            "participation_type": "A",
-            "homework_number": 1,
-            "llm_agent": "Claude",
-            "timestamp": datetime.now().isoformat(),
-            "url": "https://edstem.org/us/courses/12345/discussion/1",
-            "category": "Participation"
-        },
-        {
-            "post_id": 2,
-            "title": "Participation B - HW1 with ChatGPT",
-            "author": "Bob Smith",
-            "content": "ChatGPT helped me understand the algorithm...",
-            "participation_type": "B",
-            "homework_number": 1,
-            "llm_agent": "ChatGPT",
-            "timestamp": datetime.now().isoformat(),
-            "url": "https://edstem.org/us/courses/12345/discussion/2",
-            "category": "Participation"
-        },
-        {
-            "post_id": 3,
-            "title": "Participation C - HW2 Gemini assistance",
-            "author": "Carol Williams",
-            "content": "Gemini provided insights into optimization...",
-            "participation_type": "C",
-            "homework_number": 2,
-            "llm_agent": "Gemini",
-            "timestamp": datetime.now().isoformat(),
-            "url": "https://edstem.org/us/courses/12345/discussion/3",
-            "category": "Participation"
-        }
-    ]
-    
-    for post in demo_posts:
-        db.add_post(post)
-    
+    """Initialize the API server"""
     import os
     port = os.environ.get("PORT", "8320")
-    print(f"\n✓ Demo data loaded: {len(demo_posts)} posts")
-    print(f"✓ API ready at http://localhost:{port}")
+    print(f"\n✓ API ready at http://localhost:{port}")
     print(f"✓ Docs available at http://localhost:{port}/docs\n")
 
 
