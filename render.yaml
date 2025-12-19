@@ -1,0 +1,36 @@
+# Render Blueprint - Deploy to Render.com with one click
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API Service
+  - type: web
+    name: cs182-participation-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend_api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      # Add your Ed credentials as environment variables in Render dashboard
+      # - key: ED_API_TOKEN
+      #   sync: false  # Set manually in Render dashboard for security
+      # - key: ED_COURSE_ID
+      #   sync: false
+    healthCheckPath: /
+    autoDeploy: true
+
+  # Static Frontend (optional - can also use GitHub Pages)
+  - type: web
+    name: cs182-participation-frontend
+    runtime: static
+    buildCommand: echo "No build needed"
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+

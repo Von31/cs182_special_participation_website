@@ -570,22 +570,29 @@ async def startup_event():
     for post in demo_posts:
         db.add_post(post)
     
+    import os
+    port = os.environ.get("PORT", "8320")
     print(f"\n✓ Demo data loaded: {len(demo_posts)} posts")
-    print(f"✓ API ready at http://localhost:8320")
-    print(f"✓ Docs available at http://localhost:8320/docs\n")
+    print(f"✓ API ready at http://localhost:{port}")
+    print(f"✓ Docs available at http://localhost:{port}/docs\n")
 
 
 if __name__ == "__main__":
     import uvicorn
-    print("""
+    import os
+    
+    # Use PORT from environment (for Render.com) or default to 8320
+    port = int(os.environ.get("PORT", 8320))
+    
+    print(f"""
     ╔════════════════════════════════════════════════════════════╗
     ║   CS182A/282A Participation API Server                     ║
     ╚════════════════════════════════════════════════════════════╝
     
     Starting server...
-    - API: http://localhost:8320
-    - Docs: http://localhost:8320/docs
-    - Frontend should connect to: http://localhost:8320/api
+    - API: http://localhost:{port}
+    - Docs: http://localhost:{port}/docs
+    - Frontend should connect to: http://localhost:{port}/api
     """)
     
-    uvicorn.run(app, host="0.0.0.0", port=8320)
+    uvicorn.run(app, host="0.0.0.0", port=port)
