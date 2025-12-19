@@ -18,6 +18,6 @@ python-dotenv==1.2.1
 # WebSockets (for Ed integration)
 websockets==15.0.1
 
-# Ed API library (install from GitHub)
-git+https://github.com/bachtran02/edpy.git
+# Note: edpy is included locally in the edpy/ folder
+# It's added to PYTHONPATH in start.sh
 
