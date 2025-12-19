@@ -632,7 +632,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="studentFormGroup">
                     <label>Author Name</label>
                     <div class="dropdown-container">
                         <div class="dropdown-display" onclick="toggleDropdown('studentDropdown')">
@@ -1049,7 +1049,7 @@
 
             <div id="wordcloudTab" class="tab-content">
                 <div class="filter-note">
-                    Select participation type, author name, homework assignment, and LLM agent above, then click Search to generate word cloud and sentiment analysis
+                    Select participation type, homework assignment, and LLM agent above, then click Search to generate word cloud and sentiment analysis
                 </div>
 
                 <h3 style="margin-bottom: 20px; color: #003262;">Word Cloud</h3>
@@ -2045,15 +2045,23 @@
             
             // Activate the clicked tab button
             const tabs = document.querySelectorAll('.tab');
+            const studentFormGroup = document.getElementById('studentFormGroup');
+            
             if (tabName === 'posts') {
                 tabs[0].classList.add('active');
                 document.getElementById('postsTab').classList.add('active');
+                // Show student dropdown on posts tab
+                if (studentFormGroup) studentFormGroup.style.display = 'block';
             } else if (tabName === 'summary') {
                 tabs[1].classList.add('active');
                 document.getElementById('summaryTab').classList.add('active');
+                // Show student dropdown on summary tab
+                if (studentFormGroup) studentFormGroup.style.display = 'block';
             } else if (tabName === 'wordcloud') {
                 tabs[2].classList.add('active');
                 document.getElementById('wordcloudTab').classList.add('active');
+                // Hide student dropdown on wordcloud/sentiment tab
+                if (studentFormGroup) studentFormGroup.style.display = 'none';
             }
             
             // Ensure dropdown displays are updated after tab switch
@@ -2232,22 +2240,41 @@
             
             const pdfUrls = [];
             const patterns = [
+                // Google Drive file URLs
+                /href=["']?(https?:\/\/drive\.google\.com\/file\/d\/[^"'\s>]+)["']?/gi,
+                // Google Drive direct URLs in content
+                /(https?:\/\/drive\.google\.com\/file\/d\/[^\s"'<>]+)/gi,
+                // Ed static file URLs (most common for Ed attachments)
+                /href=["']?(https?:\/\/static\.us\.edusercontent\.com\/files\/[^"'\s>]+)["']?/gi,
                 // Standard PDF links
                 /href=["']([^"']*\.pdf[^"']*)['"]/gi,
-                // Ed file URLs
-                /href=["']([^"']*(?:edstem\.org\/api\/files|static\.us\.edstem\.org|edusercontent\.com)[^"']*)['"]/gi,
+                // Ed API file URLs
+                /href=["']([^"']*edstem\.org\/api\/files[^"']*)['"]/gi,
+                // Ed static.edstem.org URLs
+                /href=["']([^"']*static\.us\.edstem\.org[^"']*)['"]/gi,
+                // Any edusercontent.com file URLs
+                /href=["']([^"']*edusercontent\.com\/files[^"']*)['"]/gi,
                 // Any file download links
                 /<a[^>]*href=["']([^"']+)["'][^>]*download[^>]*>/gi,
                 // Direct URLs ending in .pdf
                 /(https?:\/\/[^\s"'<>]+\.pdf)/gi,
+                // src attributes for embedded files
+                /src=["']?(https?:\/\/static\.us\.edusercontent\.com\/files\/[^"'\s>]+)["']?/gi,
             ];
             
             for (const pattern of patterns) {
+                // Reset lastIndex to avoid issues with global regex
+                pattern.lastIndex = 0;
                 let match;
                 while ((match = pattern.exec(content)) !== null) {
                     const url = match[1];
                     if (url && !pdfUrls.includes(url)) {
-                        pdfUrls.push(url);
+                        // Clean up the URL (remove trailing quotes or spaces)
+                        const cleanUrl = url.replace(/["'\s>]+$/, '').trim();
+                        if (cleanUrl && !pdfUrls.includes(cleanUrl)) {
+                            pdfUrls.push(cleanUrl);
+                            console.log('Found file URL:', cleanUrl);
+                        }
                     }
                 }
             }
@@ -2384,9 +2411,9 @@
                         </a>
                     </div>`;
                     
-                    // PDF iframe container
+                    // PDF iframe container - use getEmbedUrl for Google Drive etc.
                     pdfHtml += `<div id="pdfIframeContainer" style="width: 100%; height: 550px; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
-                        <iframe id="pdfIframe" src="${pdfUrls[0]}" width="100%" height="100%" style="border: none;"></iframe>
+                        <iframe id="pdfIframe" src="${getEmbedUrl(pdfUrls[0])}" width="100%" height="100%" style="border: none;" allow="autoplay"></iframe>
                     </div>`;
                     
                     pdfViewerEl.innerHTML = pdfHtml;
@@ -2501,7 +2528,7 @@
                     if (pdfUrls.length > 0) {
                         let pdfHtml = '';
                         if (pdfUrls.length === 1) {
-                            pdfHtml = `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                            pdfHtml = `<iframe src="${getEmbedUrl(pdfUrls[0])}" width="100%" height="600px" style="border: none;" allow="autoplay"></iframe>`;
                         } else {
                             pdfHtml = '<div style="margin-bottom: 15px;">';
                             pdfUrls.forEach((url, index) => {
@@ -2512,7 +2539,7 @@
                                 </div>`;
                             });
                             pdfHtml += '</div>';
-                            pdfHtml += `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
+                            pdfHtml += `<iframe src="${getEmbedUrl(pdfUrls[0])}" width="100%" height="600px" style="border: none;" allow="autoplay"></iframe>`;
                         }
                         pdfViewerEl.innerHTML = pdfHtml;
                     } else {
@@ -2559,15 +2586,27 @@
             const homeworks = getSelectedValues('homework');
             const llms = getSelectedValues('llm');
 
-            if (participation.length === 0 && students.length === 0 && homeworks.length === 0 && llms.length === 0) {
-                alert('Please select at least one filter option');
-                return;
-            }
-
             const activeTab = document.querySelector('.tab.active').textContent.trim();
+            const isWordCloudTab = activeTab.includes('Word Cloud');
+            
+            // For Word Cloud tab, don't require student selection
+            if (isWordCloudTab) {
+                if (participation.length === 0 && homeworks.length === 0 && llms.length === 0) {
+                    alert('Please select at least one filter option (Participation, Homework, or LLM Agent)');
+                    return;
+                }
+            } else {
+                if (participation.length === 0 && students.length === 0 && homeworks.length === 0 && llms.length === 0) {
+                    alert('Please select at least one filter option');
+                    return;
+                }
+            }
+            
+            // For Word Cloud tab, ignore student selection (pass empty array)
+            const studentsToFilter = isWordCloudTab ? [] : students;
             
             // Always fetch posts (needed for both tabs)
-            const posts = await fetchPosts(participation, students, homeworks, llms);
+            const posts = await fetchPosts(participation, studentsToFilter, homeworks, llms);
             
             // Update global postsData for filtering - fetch ALL posts to ensure dropdowns have complete data
             // This ensures all LLMs are available in the dropdown even if they're not in the current filter results
@@ -2588,7 +2627,7 @@
             }
             
             // Generate word cloud and sentiment if on Word Cloud tab
-            if (activeTab.includes('Word Cloud')) {
+            if (isWordCloudTab) {
                 // Pass filtered posts to generate word cloud from actual content
                 generateWordCloud(posts, llms);
                 // Generate sentiment analysis from actual post content
@@ -2669,11 +2708,29 @@
             });
         }
 
+        // Convert file URLs to embeddable format
+        function getEmbedUrl(url) {
+            if (!url) return url;
+            
+            // Convert Google Drive URLs to preview/embed format
+            // From: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+            // To: https://drive.google.com/file/d/FILE_ID/preview
+            if (url.includes('drive.google.com/file/d/')) {
+                const match = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+                if (match && match[1]) {
+                    const fileId = match[1];
+                    return `https://drive.google.com/file/d/${fileId}/preview`;
+                }
+            }
+            
+            return url;
+        }
+
         function switchPdfView(pdfUrl) {
-            // Update the PDF iframe with the new URL
+            // Update the PDF iframe with the new URL (convert to embed format)
             const iframe = document.getElementById('pdfIframe');
             if (iframe) {
-                iframe.src = pdfUrl;
+                iframe.src = getEmbedUrl(pdfUrl);
             }
             
             // Update active state of PDF tab buttons

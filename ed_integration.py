@@ -339,6 +339,11 @@ class EdIntegration:
             
             # Pattern 1: Standard PDF links with .pdf extension
             pdf_patterns = [
+                # PRIORITY: Google Drive file URLs
+                r'href=["\']?(https?://drive\.google\.com/file/d/[^"\'\s>]+)["\']?',
+                r'(https?://drive\.google\.com/file/d/[^\s"\'<>]+)',
+                # Ed static content URLs (static.us.edusercontent.com/files)
+                r'href=["\']?(https?://static\.us\.edusercontent\.com/files/[^"\'\s>]+)["\']?',
                 r'href=["\']([^"\']*\.pdf[^"\']*)["\']',
                 # Pattern 2: Ed file URLs (static.us.edstem.org, edusercontent.com)
                 r'href=["\']([^"\']*(?:static\.us\.edstem\.org|edusercontent\.com|edstem\.org/api/files)[^"\']*)["\']',
@@ -349,7 +354,9 @@ class EdIntegration:
                 # Pattern 5: Direct Ed file API URLs
                 r'(https?://(?:us\.)?edstem\.org/api/files/[^\s"\'<>]+)',
                 # Pattern 6: Static Ed URLs
-                r'(https?://static\.(?:us\.)?edstem\.org/[^\s"\'<>]+\.pdf[^\s"\'<>]*)',
+                r'(https?://static\.(?:us\.)?edstem\.org/[^\s"\'<>]+)',
+                # Pattern 7: Ed user content URLs (covers all edusercontent patterns)
+                r'(https?://static\.us\.edusercontent\.com/files/[^\s"\'<>]+)',
             ]
             
             for pattern in pdf_patterns:
@@ -357,10 +364,13 @@ class EdIntegration:
                 for match in matches:
                     url = match.group(1)
                     if url and url not in pdf_urls:
-                        # Verify it looks like a PDF URL or Ed file URL
-                        if '.pdf' in url.lower() or 'edstem.org/api/files' in url.lower() or 'edstem.org' in url.lower():
-                            pdf_urls.append(url)
-                            print(f"   ✓ Added PDF from {field_name} (pattern match): {url[:60]}...")
+                        # Clean up URL (remove trailing quotes, spaces, >)
+                        url = re.sub(r'["\'\s>]+$', '', url).strip()
+                        # Verify it looks like a PDF URL, Ed file URL, or Google Drive URL
+                        if '.pdf' in url.lower() or 'edstem.org/api/files' in url.lower() or 'edstem.org' in url.lower() or 'edusercontent.com/files' in url.lower() or 'drive.google.com/file' in url.lower():
+                            if url not in pdf_urls:
+                                pdf_urls.append(url)
+                                print(f"   ✓ Added PDF from {field_name} (pattern match): {url[:80]}...")
             
             # Also look for Ed-specific attachment classes
             # Ed uses <a class="file-attachment"> or <div class="attachment">
