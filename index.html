@@ -485,6 +485,174 @@
             color: #003262;
         }
 
+        /* Sentiment Sentences Summary Styles */
+        .sentiment-sentences-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .sentiment-sentences-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sentiment-sentences-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sentences-column {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .sentences-column.positive {
+            border-top: 4px solid #28a745;
+        }
+
+        .sentences-column.negative {
+            border-top: 4px solid #dc3545;
+        }
+
+        .sentences-column-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .sentences-column-header .emoji {
+            font-size: 28px;
+        }
+
+        .sentences-column-header h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #003262;
+        }
+
+        .sentences-column-header .count {
+            margin-left: auto;
+            background: #f8f9fa;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .sentence-item {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .sentence-item:hover {
+            transform: translateX(4px);
+        }
+
+        .sentence-item.positive {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            border-left: 3px solid #28a745;
+        }
+
+        .sentence-item.negative {
+            background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+            border-left: 3px solid #dc3545;
+        }
+
+        .sentence-item .sentence-text {
+            color: #343a40;
+        }
+
+        .sentence-item .sentence-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .sentence-item .author-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0,50,98,0.08);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .sentence-item .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .sentence-item .keyword {
+            background: rgba(0,0,0,0.06);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .sentence-item.positive .keyword {
+            background: rgba(40,167,69,0.15);
+            color: #1e7e34;
+        }
+
+        .sentence-item.negative .keyword {
+            background: rgba(220,53,69,0.15);
+            color: #c82333;
+        }
+
+        .sentences-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #868e96;
+        }
+
+        .sentences-empty .emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .show-more-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            color: #003262;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .show-more-btn:hover {
+            background: #003262;
+            color: white;
+            border-color: #003262;
+        }
+
         h3 {
             font-weight: 700;
         }
@@ -1058,6 +1226,45 @@
                 <h3 style="margin-bottom: 20px; margin-top: 40px; color: #003262;">Sentiment Analysis by LLM Agent</h3>
                 <div class="sentiment-grid" id="sentimentGrid">
                     <p class="placeholder">Select filters above and click Search to see analysis</p>
+                </div>
+
+                <!-- Sentiment Sentences Summary Section -->
+                <div class="sentiment-sentences-section" id="sentimentSentencesSection">
+                    <h3 style="margin-bottom: 10px; color: #003262;">📊 Sentiment Summary from Posts</h3>
+                    <p style="color: #6c757d; margin-bottom: 20px; font-size: 14px;">
+                        Key positive and negative sentences extracted from the filtered Ed discussion posts
+                    </p>
+                    <div class="sentiment-sentences-container" id="sentimentSentencesContainer">
+                        <!-- Positive Sentences Column -->
+                        <div class="sentences-column positive" id="positiveSentencesColumn">
+                            <div class="sentences-column-header">
+                                <span class="emoji">😊</span>
+                                <h4>Positive Sentences</h4>
+                                <span class="count" id="positiveCount">0 found</span>
+                            </div>
+                            <div id="positiveSentencesList">
+                                <div class="sentences-empty">
+                                    <div class="emoji">💬</div>
+                                    <p>Select filters and click Search to find positive sentences</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Negative Sentences Column -->
+                        <div class="sentences-column negative" id="negativeSentencesColumn">
+                            <div class="sentences-column-header">
+                                <span class="emoji">😔</span>
+                                <h4>Negative Sentences</h4>
+                                <span class="count" id="negativeCount">0 found</span>
+                            </div>
+                            <div id="negativeSentencesList">
+                                <div class="sentences-empty">
+                                    <div class="emoji">💬</div>
+                                    <p>Select filters and click Search to find negative sentences</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2660,6 +2867,11 @@
                 // Generate sentiment analysis from actual post content
                 const sentimentResults = analyzeSentiment(posts, llms);
                 displaySentiment(llms, sentimentResults);
+                
+                // Extract and display sentiment sentences
+                const sentencesData = extractSentimentSentences(posts);
+                currentSentencesData = sentencesData; // Store for show more functionality
+                displaySentimentSentences(sentencesData);
             }
         }
 
@@ -3145,6 +3357,157 @@
                 grid.appendChild(card);
             });
         }
+
+        // Extract sentences with sentiment from posts
+        function extractSentimentSentences(posts) {
+            const positiveSentences = [];
+            const negativeSentences = [];
+            
+            posts.forEach(post => {
+                const content = post.content || post.text || post.body || '';
+                const author = post.author || 'Unknown';
+                const llm = post.llm_agent || 'Unknown';
+                const postTitle = post.title || 'Untitled';
+                
+                // Strip HTML and split into sentences
+                const textOnly = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                // Split by sentence-ending punctuation while keeping the punctuation
+                const sentences = textOnly.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 10);
+                
+                sentences.forEach(sentence => {
+                    const lowerSentence = sentence.toLowerCase();
+                    const words = lowerSentence.replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+                    
+                    let positiveMatches = [];
+                    let negativeMatches = [];
+                    
+                    words.forEach(word => {
+                        if (POSITIVE_WORDS.has(word)) positiveMatches.push(word);
+                        if (NEGATIVE_WORDS.has(word)) negativeMatches.push(word);
+                    });
+                    
+                    // Determine if sentence is predominantly positive or negative
+                    if (positiveMatches.length > negativeMatches.length && positiveMatches.length >= 1) {
+                        positiveSentences.push({
+                            text: sentence.trim(),
+                            author: author,
+                            llm: llm,
+                            title: postTitle,
+                            keywords: [...new Set(positiveMatches)].slice(0, 4),
+                            score: positiveMatches.length
+                        });
+                    } else if (negativeMatches.length > 0 && negativeMatches.length >= positiveMatches.length) {
+                        negativeSentences.push({
+                            text: sentence.trim(),
+                            author: author,
+                            llm: llm,
+                            title: postTitle,
+                            keywords: [...new Set(negativeMatches)].slice(0, 4),
+                            score: negativeMatches.length
+                        });
+                    }
+                });
+            });
+            
+            // Sort by score (number of sentiment words) and limit
+            positiveSentences.sort((a, b) => b.score - a.score);
+            negativeSentences.sort((a, b) => b.score - a.score);
+            
+            return {
+                positive: positiveSentences,
+                negative: negativeSentences
+            };
+        }
+
+        // Display sentiment sentences
+        function displaySentimentSentences(sentencesData) {
+            const positiveList = document.getElementById('positiveSentencesList');
+            const negativeList = document.getElementById('negativeSentencesList');
+            const positiveCount = document.getElementById('positiveCount');
+            const negativeCount = document.getElementById('negativeCount');
+            
+            // Update counts
+            positiveCount.textContent = `${sentencesData.positive.length} found`;
+            negativeCount.textContent = `${sentencesData.negative.length} found`;
+            
+            // Display positive sentences
+            if (sentencesData.positive.length === 0) {
+                positiveList.innerHTML = `
+                    <div class="sentences-empty">
+                        <div class="emoji">🤔</div>
+                        <p>No distinctly positive sentences found in the filtered posts</p>
+                    </div>
+                `;
+            } else {
+                const initialShow = 5;
+                const positivesToShow = sentencesData.positive.slice(0, initialShow);
+                
+                positiveList.innerHTML = positivesToShow.map(s => createSentenceItem(s, 'positive')).join('');
+                
+                if (sentencesData.positive.length > initialShow) {
+                    positiveList.innerHTML += `
+                        <button class="show-more-btn" onclick="showMoreSentences('positive')">
+                            Show ${sentencesData.positive.length - initialShow} more positive sentences
+                        </button>
+                    `;
+                }
+            }
+            
+            // Display negative sentences
+            if (sentencesData.negative.length === 0) {
+                negativeList.innerHTML = `
+                    <div class="sentences-empty">
+                        <div class="emoji">😊</div>
+                        <p>No distinctly negative sentences found in the filtered posts</p>
+                    </div>
+                `;
+            } else {
+                const initialShow = 5;
+                const negativesToShow = sentencesData.negative.slice(0, initialShow);
+                
+                negativeList.innerHTML = negativesToShow.map(s => createSentenceItem(s, 'negative')).join('');
+                
+                if (sentencesData.negative.length > initialShow) {
+                    negativeList.innerHTML += `
+                        <button class="show-more-btn" onclick="showMoreSentences('negative')">
+                            Show ${sentencesData.negative.length - initialShow} more negative sentences
+                        </button>
+                    `;
+                }
+            }
+        }
+
+        // Create a sentence item element
+        function createSentenceItem(sentence, type) {
+            // Escape HTML in the text
+            const escapedText = sentence.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const truncatedText = escapedText.length > 250 ? escapedText.substring(0, 250) + '...' : escapedText;
+            
+            return `
+                <div class="sentence-item ${type}">
+                    <div class="sentence-text">"${truncatedText}"</div>
+                    <div class="sentence-meta">
+                        <span class="author-tag">
+                            👤 ${sentence.author}
+                        </span>
+                        <span class="keywords">
+                            ${sentence.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show more sentences
+        function showMoreSentences(type) {
+            const listId = type === 'positive' ? 'positiveSentencesList' : 'negativeSentencesList';
+            const list = document.getElementById(listId);
+            const sentences = type === 'positive' ? currentSentencesData.positive : currentSentencesData.negative;
+            list.innerHTML = sentences.map(s => createSentenceItem(s, type)).join('');
+        }
+
+        // Store sentences data globally for show more functionality
+        let currentSentencesData = { positive: [], negative: [] };
     </script>
 </body>
 </html>
