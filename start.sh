@@ -3,6 +3,9 @@
 
 echo "Starting CS182A/282A Participation Portal..."
 
+# Add local edpy folder to Python path (fallback if pip install fails)
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/edpy"
+
 # Start Ed integration in background
 echo "Starting Ed integration..."
 python ed_integration.py &
