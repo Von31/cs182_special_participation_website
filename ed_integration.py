@@ -11,8 +11,8 @@ from typing import Dict, List, Optional, Union
 from dotenv import load_dotenv
 import re
 
-# Import edpy (make sure you've cloned/installed the edpy library)
-from edpy import edpy
+# Import edpy (local package in edpy/ folder)
+import edpy
 
 # You'll need to install these additional packages
 import aiohttp
