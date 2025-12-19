@@ -2507,6 +2507,10 @@
                 /(https?:\/\/[^\s"'<>]+\.pdf)/gi,
                 // src attributes for embedded files
                 /src=["']?(https?:\/\/static\.us\.edusercontent\.com\/files\/[^"'\s>]+)["']?/gi,
+                // GitHub Pages URLs (github.io)
+                /href=["']?(https?:\/\/[a-zA-Z0-9_-]+\.github\.io[^"'\s>]*)["']?/gi,
+                // GitHub Pages direct URLs in content
+                /(https?:\/\/[a-zA-Z0-9_-]+\.github\.io[^\s"'<>]*)/gi,
             ];
             
             for (const pattern of patterns) {
@@ -2994,7 +2998,9 @@
             
             if (urlLower.includes('drive.google.com')) {
                 return { icon: '📁', label: 'Google Drive' };
-            } else if (urlLower.includes('github.com') || urlLower.includes('github.io')) {
+            } else if (urlLower.includes('github.io')) {
+                return { icon: '🌐', label: 'GitHub Pages' };
+            } else if (urlLower.includes('github.com')) {
                 return { icon: '🐙', label: 'GitHub' };
             } else if (urlLower.includes('gemini.google.com')) {
                 return { icon: '✨', label: 'Gemini Chat' };
@@ -3031,6 +3037,7 @@
             if (urlLower.endsWith('.pdf')) return true;
             if (urlLower.includes('drive.google.com/file/d/')) return true; // Google Drive preview works
             if (urlLower.includes('youtube.com/embed')) return true;
+            if (urlLower.includes('github.io')) return true; // GitHub Pages can be embedded
             
             // URLs that CANNOT be embedded (due to X-Frame-Options or CSP)
             if (urlLower.includes('github.com')) return false;
