@@ -62,6 +62,14 @@ class EdParticipationParser:
         'LLaMA': r'\bllama\b',
         'Mistral': r'\bmistral\b',
         'Copilot': r'\bcopilot\b',
+        'Grok': r'\bgrok\b',
+        'Qwen': r'\bqwen\b',
+        'Kimi': r'\bkimi\b',
+        'DeepSeek': r'\bdeepseek\b',
+        'Windsurf': r'\bwindsurf\b',
+        'Perplexity': r'\bperplexity\b',
+        'Cursor': r'\bcursor\b'
+        
     }
     
     @staticmethod
@@ -196,22 +204,26 @@ class EdIntegration:
         """Extract PDF/document URLs from thread - prioritize attached PDFs"""
         pdf_urls = []
         
-        # PRIORITY 1: Check the raw data for attachments (this is where attached PDFs are)
+        # Debug: Print raw data structure to understand Ed's format
         if hasattr(thread, '_raw') and thread._raw:
             raw_data = thread._raw
+            print(f"   🔍 Debug: Raw data keys: {list(raw_data.keys())}")
             
-            # Check for attachments field (primary source for attached PDFs)
+            # PRIORITY 1: Check for attachments field (primary source for attached PDFs)
             if 'attachments' in raw_data:
                 attachments = raw_data['attachments']
+                print(f"   🔍 Debug: Found attachments field with {len(attachments) if isinstance(attachments, list) else 'non-list'} items")
                 if isinstance(attachments, list):
                     for att in attachments:
+                        print(f"   🔍 Debug: Attachment: {att}")
                         if isinstance(att, dict):
                             # Extract URL from various possible fields
                             url = None
                             # Try different URL field names
-                            for url_field in ['url', 'file', 'file_url', 'download_url', 'src', 'href']:
+                            for url_field in ['url', 'file', 'file_url', 'download_url', 'src', 'href', 'link']:
                                 if url_field in att and att[url_field]:
                                     url = att[url_field]
+                                    print(f"   🔍 Debug: Found URL in '{url_field}': {url[:80]}...")
                                     break
                             
                             # If no URL found, try to construct from file_id or id
@@ -220,12 +232,13 @@ class EdIntegration:
                                 if file_id:
                                     # Construct Ed URL for file
                                     url = f"https://us.edstem.org/api/files/{file_id}"
+                                    print(f"   🔍 Debug: Constructed URL from file_id: {url}")
                             
                             if url:
                                 # Check if it's a PDF by extension or type
                                 file_type = att.get('type', '').lower()
-                                file_name = att.get('name', '').lower()
-                                mime_type = att.get('mime_type', '').lower()
+                                file_name = att.get('name', '').lower() or att.get('filename', '').lower()
+                                mime_type = att.get('mime_type', '').lower() or att.get('content_type', '').lower()
                                 
                                 # Accept if it's explicitly a PDF or has .pdf extension
                                 is_pdf = (
@@ -241,37 +254,46 @@ class EdIntegration:
                                 
                                 if is_pdf and url not in pdf_urls:
                                     pdf_urls.append(url)
+                                    print(f"   ✓ Added PDF from attachments: {url[:60]}...")
             
             # Check for document field in raw data
             if 'document' in raw_data and raw_data['document']:
                 doc = raw_data['document']
+                print(f"   🔍 Debug: Found document field: {type(doc)}")
                 if isinstance(doc, dict):
+                    print(f"   🔍 Debug: Document dict keys: {list(doc.keys())}")
                     # Try various URL fields
-                    for url_field in ['url', 'file', 'file_url', 'download_url']:
+                    for url_field in ['url', 'file', 'file_url', 'download_url', 'src']:
                         if url_field in doc and doc[url_field]:
                             url = doc[url_field]
                             if url not in pdf_urls:
                                 pdf_urls.append(url)
+                                print(f"   ✓ Added PDF from document: {url[:60]}...")
                             break
                 elif isinstance(doc, str) and doc.startswith('http'):
                     if doc not in pdf_urls:
                         pdf_urls.append(doc)
+                        print(f"   ✓ Added PDF from document string: {doc[:60]}...")
             
             # Check for files field (alternative to attachments)
             if 'files' in raw_data:
                 files = raw_data['files']
+                print(f"   🔍 Debug: Found files field with {len(files) if isinstance(files, list) else 'non-list'} items")
                 if isinstance(files, list):
                     for file_item in files:
+                        print(f"   🔍 Debug: File item: {file_item}")
                         if isinstance(file_item, dict):
-                            url = file_item.get('url') or file_item.get('file') or file_item.get('file_url')
+                            url = file_item.get('url') or file_item.get('file') or file_item.get('file_url') or file_item.get('src')
                             if url and url not in pdf_urls:
                                 # Check if it's a PDF
-                                file_name = file_item.get('name', '').lower()
-                                if '.pdf' in file_name or file_item.get('type', '').lower() == 'pdf':
+                                file_name = file_item.get('name', '').lower() or file_item.get('filename', '').lower()
+                                if '.pdf' in file_name or file_item.get('type', '').lower() == 'pdf' or '.pdf' in url.lower():
                                     pdf_urls.append(url)
+                                    print(f"   ✓ Added PDF from files: {url[:60]}...")
         
         # PRIORITY 2: Check the document field on thread object
         if hasattr(thread, 'document') and thread.document:
+            print(f"   🔍 Debug: Thread has document attribute: {type(thread.document)}")
             # Document might be a URL string or JSON string
             if isinstance(thread.document, str):
                 # Try to parse as JSON first
@@ -283,6 +305,7 @@ class EdIntegration:
                             if url_field in doc_data and doc_data[url_field]:
                                 if doc_data[url_field] not in pdf_urls:
                                     pdf_urls.append(doc_data[url_field])
+                                    print(f"   ✓ Added PDF from thread.document JSON: {doc_data[url_field][:60]}...")
                                 break
                     elif isinstance(doc_data, list):
                         for item in doc_data:
@@ -297,24 +320,64 @@ class EdIntegration:
                     if thread.document.startswith('http') and thread.document not in pdf_urls:
                         pdf_urls.append(thread.document)
         
-        # PRIORITY 3: Check content for PDF links in HTML (these are usually embedded links, not attachments)
+        # PRIORITY 3: Check content for PDF links in HTML
+        # Ed uses various URL patterns for files
+        content_to_check = []
         if hasattr(thread, 'content') and thread.content:
-            # Look for PDF links in HTML content
-            pdf_link_pattern = r'href=["\']([^"\']*\.pdf[^"\']*)["\']|href=["\']([^"\']*edusercontent\.com[^"\']*)["\']'
-            matches = re.finditer(pdf_link_pattern, thread.content, re.IGNORECASE)
-            for match in matches:
-                url = match.group(1) or match.group(2)
-                if url and url not in pdf_urls:
-                    pdf_urls.append(url)
-        
-        # Also check thread.text for PDF links
+            content_to_check.append(('content', thread.content))
         if hasattr(thread, 'text') and thread.text:
-            pdf_link_pattern = r'href=["\']([^"\']*\.pdf[^"\']*)["\']|href=["\']([^"\']*edusercontent\.com[^"\']*)["\']'
-            matches = re.finditer(pdf_link_pattern, thread.text, re.IGNORECASE)
-            for match in matches:
-                url = match.group(1) or match.group(2)
-                if url and url not in pdf_urls:
-                    pdf_urls.append(url)
+            content_to_check.append(('text', thread.text))
+        if hasattr(thread, '_raw') and thread._raw:
+            if 'content' in thread._raw and thread._raw['content']:
+                content_to_check.append(('raw_content', thread._raw['content']))
+            if 'text' in thread._raw and thread._raw['text']:
+                content_to_check.append(('raw_text', thread._raw['text']))
+        
+        for field_name, content in content_to_check:
+            if not content:
+                continue
+            
+            # Pattern 1: Standard PDF links with .pdf extension
+            pdf_patterns = [
+                r'href=["\']([^"\']*\.pdf[^"\']*)["\']',
+                # Pattern 2: Ed file URLs (static.us.edstem.org, edusercontent.com)
+                r'href=["\']([^"\']*(?:static\.us\.edstem\.org|edusercontent\.com|edstem\.org/api/files)[^"\']*)["\']',
+                # Pattern 3: Anchor tags with download attribute
+                r'<a[^>]*href=["\']([^"\']+)["\'][^>]*download[^>]*>',
+                # Pattern 4: File attachment links (Ed often uses data attributes)
+                r'data-(?:file-)?url=["\']([^"\']+\.pdf[^"\']*)["\']',
+                # Pattern 5: Direct Ed file API URLs
+                r'(https?://(?:us\.)?edstem\.org/api/files/[^\s"\'<>]+)',
+                # Pattern 6: Static Ed URLs
+                r'(https?://static\.(?:us\.)?edstem\.org/[^\s"\'<>]+\.pdf[^\s"\'<>]*)',
+            ]
+            
+            for pattern in pdf_patterns:
+                matches = re.finditer(pattern, content, re.IGNORECASE)
+                for match in matches:
+                    url = match.group(1)
+                    if url and url not in pdf_urls:
+                        # Verify it looks like a PDF URL or Ed file URL
+                        if '.pdf' in url.lower() or 'edstem.org/api/files' in url.lower() or 'edstem.org' in url.lower():
+                            pdf_urls.append(url)
+                            print(f"   ✓ Added PDF from {field_name} (pattern match): {url[:60]}...")
+            
+            # Also look for Ed-specific attachment classes
+            # Ed uses <a class="file-attachment"> or <div class="attachment">
+            attachment_patterns = [
+                r'class=["\'][^"\']*(?:file-attachment|attachment|file)[^"\']*["\'][^>]*href=["\']([^"\']+)["\']',
+                r'href=["\']([^"\']+)["\'][^>]*class=["\'][^"\']*(?:file-attachment|attachment|file)[^"\']*["\']',
+                # Look for any anchor with PDF in the text
+                r'<a[^>]*href=["\']([^"\']+)["\'][^>]*>[^<]*\.pdf[^<]*</a>',
+            ]
+            
+            for pattern in attachment_patterns:
+                matches = re.finditer(pattern, content, re.IGNORECASE)
+                for match in matches:
+                    url = match.group(1)
+                    if url and url not in pdf_urls:
+                        pdf_urls.append(url)
+                        print(f"   ✓ Added file from {field_name} (attachment class): {url[:60]}...")
         
         # Remove duplicates while preserving order
         seen = set()
@@ -328,6 +391,8 @@ class EdIntegration:
             print(f"   📎 Found {len(unique_urls)} PDF attachment(s)")
             for i, url in enumerate(unique_urls, 1):
                 print(f"      {i}. {url[:80]}...")
+        else:
+            print(f"   📎 No PDF attachments found")
         
         return unique_urls
     
@@ -376,26 +441,62 @@ class EdIntegration:
             thread_title = thread._raw.get('title')
         thread_title = thread_title or 'Untitled'
         
-        # Handle thread content - prioritize thread.text for executive summary
-        # Check thread.text first (this is what should be used for executive summary)
-        thread_content = getattr(thread, 'text', None)
-        if not thread_content and hasattr(thread, '_raw') and thread._raw:
-            thread_content = thread._raw.get('text')
+        # Handle thread content - prioritize document field for rich content
+        thread_content = None
         
-        # If text is not available, try content field as fallback
+        # PRIORITY 1: Check for document field (Ed stores rich HTML content here)
+        if hasattr(thread, 'document') and thread.document:
+            print(f"   📄 Found thread.document field")
+            if isinstance(thread.document, str):
+                # Document is HTML string - use it directly
+                thread_content = thread.document
+                print(f"   📄 Using thread.document as content ({len(thread_content)} chars)")
+        
+        # Also check raw data for document
+        if not thread_content and hasattr(thread, '_raw') and thread._raw:
+            raw_doc = thread._raw.get('document')
+            if raw_doc:
+                print(f"   📄 Found raw_data['document'] field: {type(raw_doc)}")
+                if isinstance(raw_doc, str):
+                    thread_content = raw_doc
+                    print(f"   📄 Using raw document as content ({len(thread_content)} chars)")
+                elif isinstance(raw_doc, dict):
+                    # Document might be a dict with content field
+                    doc_content = raw_doc.get('content') or raw_doc.get('html') or raw_doc.get('body')
+                    if doc_content:
+                        thread_content = doc_content
+                        print(f"   📄 Using document.content as content ({len(thread_content)} chars)")
+        
+        # PRIORITY 2: Check thread.text (Ed's text version of content)
+        if not thread_content:
+            thread_content = getattr(thread, 'text', None)
+            if not thread_content and hasattr(thread, '_raw') and thread._raw:
+                thread_content = thread._raw.get('text')
+            if thread_content:
+                print(f"   📄 Using thread.text as content ({len(thread_content)} chars)")
+        
+        # PRIORITY 3: Try content field as fallback
         if not thread_content:
             thread_content = getattr(thread, 'content', None)
             if not thread_content and hasattr(thread, '_raw') and thread._raw:
                 thread_content = thread._raw.get('content')
+            if thread_content:
+                print(f"   📄 Using thread.content as content ({len(thread_content)} chars)")
         
-        # If still None, try body field
+        # PRIORITY 4: Try body field
         if not thread_content:
             thread_content = getattr(thread, 'body', None)
             if not thread_content and hasattr(thread, '_raw') and thread._raw:
                 thread_content = thread._raw.get('body')
+            if thread_content:
+                print(f"   📄 Using thread.body as content ({len(thread_content)} chars)")
         
         # Ensure we have content - use title as last resort
         thread_content = thread_content or ''
+        
+        # Debug: Print all available fields in raw data
+        if hasattr(thread, '_raw') and thread._raw:
+            print(f"   🔍 Available raw fields: {list(thread._raw.keys())}")
         
         # If content is HTML, we might want to strip tags or keep them
         # For now, keep the raw content as it comes from Ed
@@ -590,8 +691,8 @@ class EdIntegration:
         
         # Filter: Only process posts with "Special Participation" in the title
         thread_title = getattr(thread, 'title', None) or ''
-        if 'Special Participation' not in thread_title:
-            print(f"   ⏭️  Skipping thread (not a Special Participation post): {thread_title[:50]}...")
+        if 'Special Participation' not in thread_title or 'Participation' not in thread_title:
+            print(f"   ⏭️  Skipping thread (not a Special Participation or Participation related post): {thread_title[:50]}...")
             return
         
         # Process the thread

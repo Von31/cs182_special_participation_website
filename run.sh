@@ -79,6 +79,9 @@ case $choice in
             echo ""
             echo "Terminal 1: python backend_api.py"
             echo "Terminal 2: python ed_integration.py"
+
+            python backend_api.py &
+            python ed_integration.py 
         fi
         ;;
     4)

@@ -363,31 +363,57 @@
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid #003262;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .summary-card h3 {
             color: #003262;
             margin-bottom: 15px;
             font-weight: 700;
+            flex-shrink: 0;
         }
 
         .summary-text {
             line-height: 1.8;
             color: #495057;
-            max-height: 600px;
-            overflow-y: auto;
             padding: 10px;
+            flex: 1;
+            overflow-y: auto;
         }
+        
+        /* Ed post content styles */
+        .ed-post-content h1 { font-size: 1.6em; font-weight: 700; color: #003262; margin: 18px 0 12px 0; }
+        .ed-post-content h2 { font-size: 1.35em; font-weight: 700; color: #003262; margin: 16px 0 10px 0; border-bottom: 2px solid #FDB515; padding-bottom: 5px; }
+        .ed-post-content h3 { font-size: 1.15em; font-weight: 600; color: #003262; margin: 14px 0 8px 0; }
+        .ed-post-content p { margin: 10px 0; line-height: 1.8; }
+        .ed-post-content b, .ed-post-content strong { font-weight: 700; color: #003262; }
+        .ed-post-content i, .ed-post-content em { font-style: italic; }
+        .ed-post-content ul, .ed-post-content ol { margin: 12px 0; padding-left: 25px; }
+        .ed-post-content li { margin: 6px 0; line-height: 1.7; }
+        .ed-post-content a { color: #003262; text-decoration: underline; }
+        .ed-post-content a:hover { color: #FDB515; }
+        .ed-post-content code { font-family: monospace; background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+        .ed-post-content pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+        .ed-post-content blockquote { border-left: 3px solid #FDB515; padding-left: 12px; margin: 12px 0; color: #6c757d; }
+        .ed-post-content .amber-display-file { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; margin: 8px 0; }
+        .ed-post-content .amber-display-file img { width: 20px; height: 20px; }
+        .ed-post-content .amber-display-file a { text-decoration: none; font-weight: 600; }
 
         .pdf-viewer {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             min-height: 400px;
+            max-height: 80vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             border: 2px dashed #dee2e6;
+            overflow-y: auto;
         }
 
         .placeholder {
@@ -417,16 +443,22 @@
 
         .sentiment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
         }
 
         .sentiment-card {
             background: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .sentiment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         }
 
         .sentiment-card.positive {
@@ -556,7 +588,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>CS182A/282A Special Participation Search Portal</h1>
+            <h1>CS182/282A Special Participation Search Portal</h1>
             <p>Search and analyze special participation submissions across different LLM agents</p>
         </div>
 
@@ -978,7 +1010,7 @@
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('posts')">Posts</button>
-            <button class="tab" onclick="switchTab('summary')">Executive Summary & PDF</button>
+            <button class="tab" onclick="switchTab('summary')">Post Previewer</button>
             <button class="tab" onclick="switchTab('wordcloud')">Word Cloud & Sentiment</button>
         </div>
 
@@ -997,9 +1029,9 @@
             <div id="summaryTab" class="tab-content">
                 <div class="summary-view">
                     <div class="summary-card">
-                        <h3>Executive Summary</h3>
+                        <h3>Ed Post</h3>
                         <div class="summary-text" id="summaryText">
-                            <p class="placeholder">Select participation type,  author name, homework assignment, and LLM agent to view the executive summary.</p>
+                            <p class="placeholder">Select participation type,  author name, homework assignment, and LLM agent to view the Ed post.</p>
                         </div>
                     </div>
                     <div class="pdf-viewer" id="pdfViewer">
@@ -1008,7 +1040,8 @@
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
-                            <p>Annotated code PDF will appear here</p>
+                            <p>PDF attachment will appear here</p>
+                            <p style="font-size: 12px; color: #868e96; margin-top: 5px;">Click on a post from the Posts tab to view</p>
                         </div>
                     </div>
                 </div>
@@ -1669,58 +1702,8 @@
         }
 
         function clearAllSelections() {
-            // Clear all checkbox selections
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            
-            // Update all dropdown displays
-            updateDisplay('participation');
-            updateDisplay('student');
-            updateDisplay('homework');
-            updateDisplay('llm');
-            
-            // Clear posts grid
-            const postsGrid = document.getElementById('postsGrid');
-            if (postsGrid) {
-                postsGrid.innerHTML = '<p class="placeholder">Select filters above and click Search to see posts</p>';
-            }
-            
-            // Clear executive summary text
-            const summaryText = document.getElementById('summaryText');
-            if (summaryText) {
-                summaryText.innerHTML = '<p class="placeholder">Select participation type,  author name, homework assignment, and LLM agent to view the executive summary.</p>';
-            }
-            
-            // Clear PDF viewer
-            const pdfViewer = document.getElementById('pdfViewer');
-            if (pdfViewer) {
-                pdfViewer.innerHTML = `
-                    <div class="placeholder">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                        <p>Annotated code PDF will appear here</p>
-                    </div>
-                `;
-            }
-            
-            // Clear word cloud
-            const wordcloud = document.getElementById('wordcloud');
-            if (wordcloud) {
-                wordcloud.innerHTML = '';
-            }
-            
-            // Clear sentiment grid
-            const sentimentGrid = document.getElementById('sentimentGrid');
-            if (sentimentGrid) {
-                sentimentGrid.innerHTML = '';
-            }
-            
-            // Reset postsData to empty array
-            postsData = [];
-            
-            // Re-filter dropdowns to enable all options
-            filterDropdowns();
+            // Simply refresh the page to reset all state
+            window.location.reload();
         }
 
         function updateDisplay(type) {
@@ -1827,7 +1810,10 @@
             
             // Filter Homework dropdown
             document.querySelectorAll('#homeworkDropdown .dropdown-item').forEach(item => {
-                const hwValue = item.querySelector('input').value;
+                const inputEl = item.querySelector('input');
+                if (!inputEl) return; // Skip items without input (like loading spinners)
+                
+                const hwValue = inputEl.value;
                 let show = true;
                 
                 // Check if any posts match this homework with selected students/LLMs/participation
@@ -1848,34 +1834,30 @@
                     }
                 }
 
-                const checkbox = item.querySelector('input');
-                const isCurrentlySelected = checkbox && checkbox.checked;
+                const isCurrentlySelected = inputEl.checked;
                 
                 if (!show && (selectedStudents.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0)) {
                     // Only disable if not currently selected (preserve user's current selection)
                     if (!isCurrentlySelected) {
                         item.classList.add('disabled');
-                        if (checkbox) {
-                            checkbox.disabled = true;
-                        }
+                        inputEl.disabled = true;
                     } else {
                         // Keep it enabled if it's selected
                         item.classList.remove('disabled');
-                        if (checkbox) {
-                            checkbox.disabled = false;
-                        }
+                        inputEl.disabled = false;
                     }
                 } else {
                     item.classList.remove('disabled');
-                    if (checkbox) {
-                        checkbox.disabled = false;
-                    }
+                    inputEl.disabled = false;
                 }
             });
 
             // Filter Student dropdown
             document.querySelectorAll('#studentDropdown .dropdown-item').forEach(item => {
-                const student = item.querySelector('input').value;
+                const inputEl = item.querySelector('input');
+                if (!inputEl) return; // Skip items without input (like loading spinners)
+                
+                const student = inputEl.value;
                 let show = true;
                 
                 // Check if any posts match this student with selected homeworks/LLMs/participation
@@ -1898,16 +1880,19 @@
 
                 if (!show && (selectedHomework.length > 0 || selectedLLMs.length > 0 || selectedParticipation.length > 0)) {
                     item.classList.add('disabled');
-                    item.querySelector('input').disabled = true;
+                    inputEl.disabled = true;
                 } else {
                     item.classList.remove('disabled');
-                    item.querySelector('input').disabled = false;
+                    inputEl.disabled = false;
                 }
             });
 
             // Filter LLM dropdown
             document.querySelectorAll('#llmDropdown .dropdown-item').forEach(item => {
-                const llm = item.querySelector('input').value;
+                const inputEl = item.querySelector('input');
+                if (!inputEl) return; // Skip items without input (like loading spinners)
+                
+                const llm = inputEl.value;
                 let show = true;
                 
                 // Check if any posts match this LLM with selected students/homeworks/participation
@@ -1931,34 +1916,30 @@
 
                 // Disable if no matching posts found and there are active filters
                 // BUT don't disable if this item is already selected (to prevent losing selections)
-                const checkbox = item.querySelector('input');
-                const isCurrentlySelected = checkbox && checkbox.checked;
+                const isCurrentlySelected = inputEl.checked;
                 
                 if (!show && (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedParticipation.length > 0)) {
                     // Only disable if not currently selected (preserve user's current selection)
                     if (!isCurrentlySelected) {
                         item.classList.add('disabled');
-                        if (checkbox) {
-                            checkbox.disabled = true;
-                        }
+                        inputEl.disabled = true;
                     } else {
                         // Keep it enabled if it's selected, even if no matches (user might be building their selection)
                         item.classList.remove('disabled');
-                        if (checkbox) {
-                            checkbox.disabled = false;
-                        }
+                        inputEl.disabled = false;
                     }
                 } else {
                     item.classList.remove('disabled');
-                    if (checkbox) {
-                        checkbox.disabled = false;
-                    }
+                    inputEl.disabled = false;
                 }
             });
 
             // Filter Participation dropdown
             document.querySelectorAll('#participationDropdown .dropdown-item').forEach(item => {
-                const participation = item.querySelector('input').value;
+                const inputEl = item.querySelector('input');
+                if (!inputEl) return; // Skip items without input (like loading spinners)
+                
+                const participation = inputEl.value;
                 let show = true;
                 
                 // Check if any posts match this participation with selected students/homeworks/LLMs
@@ -1979,28 +1960,21 @@
                     }
                 }
 
-                const checkbox = item.querySelector('input');
-                const isCurrentlySelected = checkbox && checkbox.checked;
+                const isCurrentlySelected = inputEl.checked;
                 
                 if (!show && (selectedStudents.length > 0 || selectedHomework.length > 0 || selectedLLMs.length > 0)) {
                     // Only disable if not currently selected (preserve user's current selection)
                     if (!isCurrentlySelected) {
                         item.classList.add('disabled');
-                        if (checkbox) {
-                            checkbox.disabled = true;
-                        }
+                        inputEl.disabled = true;
                     } else {
                         // Keep it enabled if it's selected
                         item.classList.remove('disabled');
-                        if (checkbox) {
-                            checkbox.disabled = false;
-                        }
+                        inputEl.disabled = false;
                     }
                 } else {
                     item.classList.remove('disabled');
-                    if (checkbox) {
-                        checkbox.disabled = false;
-                    }
+                    inputEl.disabled = false;
                 }
             });
         }
@@ -2214,7 +2188,7 @@
                 updateDisplay('llm');
                 updateDisplay('participation');
                 
-                // Switch to summary tab first
+                // Switch to Post Previewer tab
                 switchTab('summary');
                 
                 // Wait a bit to ensure tab switch is complete
@@ -2226,16 +2200,60 @@
                 updateDisplay('llm');
                 updateDisplay('participation');
                 
-                // Re-filter dropdowns again after tab switch
+                // Re-filter dropdowns
                 filterDropdowns();
                 
-                // Display the post's content as the executive summary
-                // This works even if dropdown selections weren't set
-                displayPostSummary(post);
+                // Try to call searchSubmission to fetch and display the full post content from API
+                console.log('Attempting searchSubmission with filters:', { author, homework, llm, participation });
+                
+                // Call searchSubmission with skipAlert=true so it won't show an alert if filters are missing
+                const searchResult = await searchSubmission(true);
+                
+                // If searchSubmission returns false (missing filters) or fails, display the post directly
+                if (searchResult === false) {
+                    console.log('searchSubmission returned false, displaying post content directly');
+                    displayPostSummary(post);
+                }
             } catch (error) {
                 console.error('Error navigating to post summary:', error);
-                alert('An error occurred while navigating to the executive summary. Please try selecting the filters manually.');
+                // Fallback: try to display the post content directly
+                try {
+                    displayPostSummary(post);
+                } catch (e) {
+                    console.error('Fallback display also failed:', e);
+                    alert('An error occurred while loading the post. Please try selecting the filters manually.');
+                }
             }
+        }
+
+        function extractPdfsFromContent(content) {
+            // Try to extract PDF URLs from HTML content
+            if (!content) return [];
+            
+            const pdfUrls = [];
+            const patterns = [
+                // Standard PDF links
+                /href=["']([^"']*\.pdf[^"']*)['"]/gi,
+                // Ed file URLs
+                /href=["']([^"']*(?:edstem\.org\/api\/files|static\.us\.edstem\.org|edusercontent\.com)[^"']*)['"]/gi,
+                // Any file download links
+                /<a[^>]*href=["']([^"']+)["'][^>]*download[^>]*>/gi,
+                // Direct URLs ending in .pdf
+                /(https?:\/\/[^\s"'<>]+\.pdf)/gi,
+            ];
+            
+            for (const pattern of patterns) {
+                let match;
+                while ((match = pattern.exec(content)) !== null) {
+                    const url = match[1];
+                    if (url && !pdfUrls.includes(url)) {
+                        pdfUrls.push(url);
+                    }
+                }
+            }
+            
+            console.log('Extracted PDFs from content:', pdfUrls);
+            return pdfUrls;
         }
 
         function displayPostSummary(post) {
@@ -2243,16 +2261,25 @@
             console.log('Post content field:', post.content);
             console.log('Post content type:', typeof post.content);
             console.log('Post content length:', post.content ? post.content.length : 0);
+            console.log('Post pdf_urls from API:', post.pdf_urls);
             
             // Get the post content - prioritize content field (which comes from thread.content)
             let postContent = post.content;
             
             console.log('Initial postContent:', postContent ? postContent.substring(0, 100) : 'null/undefined');
             
-            // If content is not available, try other fields
+            // If content is not available, try other fields (prioritize full content, not excerpt)
             if (!postContent || (typeof postContent === 'string' && postContent.trim() === '')) {
                 console.log('Content not found, trying alternatives...');
-                postContent = post.text || post.excerpt || post.body || '';
+                // Try text and body first (full content), only use excerpt as last resort
+                postContent = post.text || post.body || '';
+                // If still empty, use excerpt but note it's truncated
+                if (!postContent || postContent.trim() === '') {
+                    postContent = post.excerpt || '';
+                    if (postContent) {
+                        console.log('Using excerpt (may be truncated)');
+                    }
+                }
                 console.log('Alternative content found:', postContent ? postContent.substring(0, 100) : 'none');
             }
             
@@ -2279,45 +2306,104 @@
             }
             // If it's already HTML, use it as-is
             
-            // Display in summary text area
+            // Build post header with metadata
+            const participationType = post.participation_type || post.participation || '';
+            const participationBadge = participationType ? `<span class="participation-badge ${participationType.toLowerCase()}" style="margin-left: 10px;">Participation ${participationType}</span>` : '';
+            const hwDisplay = post.homework_number !== null && post.homework_number !== undefined && post.homework_number !== '' && post.homework_number !== 'unknown' ? `HW ${post.homework_number}` : '';
+            const llmDisplay = post.llm_agent || '';
+            const metaItems = [hwDisplay, llmDisplay].filter(Boolean).join(' • ');
+            
+            // Display in summary text area with header
             const summaryTextEl = document.getElementById('summaryText');
             if (summaryTextEl) {
-                summaryTextEl.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #212529; padding: 10px;">${formattedContent}</div>`;
-                console.log('Content displayed in summaryText element');
+                // Use different styling for HTML content vs plain text
+                const contentStyle = isHTML 
+                    ? 'line-height: 1.8; font-size: 16px; color: #212529; padding: 10px 0;'
+                    : 'white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #212529; padding: 10px 0;';
+                
+                summaryTextEl.innerHTML = `
+                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #dee2e6;">
+                        <h4 style="color: #003262; margin-bottom: 8px; font-size: 18px;">${post.title || 'Untitled Post'}</h4>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-weight: 600; color: #212529;">${post.author || 'Unknown'}</span>
+                            ${participationBadge}
+                            ${metaItems ? `<span style="color: #6c757d; font-size: 14px;">${metaItems}</span>` : ''}
+                        </div>
+                        ${post.url ? `<a href="${post.url}" target="_blank" style="color: #003262; font-size: 14px; margin-top: 8px; display: inline-block; text-decoration: none;">View on Ed →</a>` : ''}
+                    </div>
+                    <div class="ed-post-content" style="${contentStyle}">${formattedContent}</div>
+                `;
+                console.log('Content displayed in summaryText element, isHTML:', isHTML, 'content length:', formattedContent.length);
             } else {
                 console.error('summaryText element not found!');
             }
             
             // Handle PDF display
-            const pdfUrls = post.pdf_urls || [];
+            // First try to get PDFs from API response
+            let pdfUrls = post.pdf_urls || [];
+            
+            // If no PDFs from API, try to extract from content HTML
+            if (pdfUrls.length === 0 && postContent) {
+                const extractedPdfs = extractPdfsFromContent(postContent);
+                if (extractedPdfs.length > 0) {
+                    pdfUrls = extractedPdfs;
+                    console.log('Using PDFs extracted from content:', pdfUrls);
+                }
+            }
+            
+            console.log('PDF URLs to display:', pdfUrls);
             const pdfViewerEl = document.getElementById('pdfViewer');
             if (pdfViewerEl) {
                 if (pdfUrls.length > 0) {
                     let pdfHtml = '';
-                    if (pdfUrls.length === 1) {
-                        pdfHtml = `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
-                    } else {
-                        pdfHtml = '<div style="margin-bottom: 15px;">';
+                    
+                    // Add PDF header with count
+                    pdfHtml += `<div style="margin-bottom: 15px; text-align: center;">
+                        <h4 style="color: #003262; margin-bottom: 10px;">📄 PDF Attachment${pdfUrls.length > 1 ? 's' : ''} (${pdfUrls.length})</h4>
+                    </div>`;
+                    
+                    // If multiple PDFs, show tabs/buttons to switch between them
+                    if (pdfUrls.length > 1) {
+                        pdfHtml += '<div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">';
                         pdfUrls.forEach((url, index) => {
-                            pdfHtml += `<div style="margin-bottom: 10px;">
-                                <a href="${url}" target="_blank" style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: #f8f9fa; border-radius: 4px; display: inline-block;">
-                                    PDF ${index + 1}
-                                </a>
-                            </div>`;
+                            pdfHtml += `<button onclick="switchPdfView('${url.replace(/'/g, "\\'")}')" 
+                                style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: ${index === 0 ? '#FDB515' : '#f8f9fa'}; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+                                class="pdf-tab-btn ${index === 0 ? 'active' : ''}"
+                                onmouseover="if(!this.classList.contains('active')) this.style.background='#e9ecef'"
+                                onmouseout="if(!this.classList.contains('active')) this.style.background='#f8f9fa'">
+                                PDF ${index + 1}
+                            </button>`;
                         });
                         pdfHtml += '</div>';
-                        pdfHtml += `<iframe src="${pdfUrls[0]}" width="100%" height="600px" style="border: none;"></iframe>`;
                     }
+                    
+                    // Add download link
+                    pdfHtml += `<div style="margin-bottom: 10px; text-align: center;">
+                        <a href="${pdfUrls[0]}" target="_blank" download style="color: #003262; font-size: 14px; text-decoration: none;">
+                            ⬇️ Open in new tab / Download
+                        </a>
+                    </div>`;
+                    
+                    // PDF iframe container
+                    pdfHtml += `<div id="pdfIframeContainer" style="width: 100%; height: 550px; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+                        <iframe id="pdfIframe" src="${pdfUrls[0]}" width="100%" height="100%" style="border: none;"></iframe>
+                    </div>`;
+                    
                     pdfViewerEl.innerHTML = pdfHtml;
+                    pdfViewerEl.style.display = 'block';
+                    pdfViewerEl.style.padding = '20px';
+                    pdfViewerEl.style.background = '#f8f9fa';
+                    pdfViewerEl.style.borderRadius = '8px';
+                    pdfViewerEl.style.border = '2px solid #dee2e6';
                 } else {
                     pdfViewerEl.innerHTML = `
-                        <div style="text-align: center;">
-                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#003262" stroke-width="2">
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
-                            <p style="color: #003262; font-weight: 600; margin-top: 10px;">No PDF Available</p>
-                            <p style="color: #6c757d; font-size: 14px;">${post.author || 'Unknown'} - ${post.homework_number !== null && post.homework_number !== undefined && post.homework_number !== '' && post.homework_number !== 'unknown' ? `Homework ${post.homework_number}` : 'N/A'} - ${post.llm_agent || 'Unknown'}</p>
+                            <p style="color: #003262; font-weight: 600; margin-top: 15px; font-size: 16px;">No PDF Attachment</p>
+                            <p style="color: #6c757d; font-size: 14px; margin-top: 5px;">This post does not have a PDF attached.</p>
                         </div>
                     `;
                 }
@@ -2327,7 +2413,7 @@
         function handleSearch() {
             const activeTab = document.querySelector('.tab.active').textContent.trim();
             
-            if (activeTab.includes('Executive Summary')) {
+            if (activeTab.includes('Post Previewer')) {
                 searchSubmission();
             } else if (activeTab.includes('Posts')) {
                 applyFilters();
@@ -2336,22 +2422,24 @@
             }
         }
 
-        async function searchSubmission() {
+        async function searchSubmission(skipAlert = false) {
             const students = getSelectedValues('student');
             const homeworks = getSelectedValues('homework');
             const llms = getSelectedValues('llm');
             const participation = getSelectedValues('participation');
 
-            // For executive summary, we need at least one from each dropdown
-            if (students.length === 0 || homeworks.length === 0 || llms.length === 0 || participation.length === 0) {
-                alert('Please select at least one option from each dropdown (Participation, Author Name, Homework Number, and LLM Agent)');
-                return;
+            // For search, we need at least student, homework, and llm
+            if (students.length === 0 || homeworks.length === 0 || llms.length === 0) {
+                if (!skipAlert) {
+                    alert('Please select at least one option from Author Name, Homework Number, and LLM Agent dropdowns');
+                }
+                return false;
             }
 
             const student = students[0];
             const homework = homeworks[0];
             const llm = llms[0];
-            const part = participation[0];
+            const part = participation.length > 0 ? participation[0] : null;
 
             // Show loading state
             const summaryTextEl = document.getElementById('summaryText');
@@ -2367,12 +2455,43 @@
             const data = await fetchSubmission(student, homework, llm);
             console.log('Received submission data:', data);
 
-            if (data && data.summary) {
-                // Format summary with line breaks
-                const formattedSummary = data.summary.replace(/\n/g, '<br>');
+            if (data && (data.content || data.full_content || data.posts)) {
+                // Use full content from posts, not the executive summary
+                let fullContent = data.content || data.full_content || '';
+                
+                // If we have posts array, use the first post's content
+                if ((!fullContent || fullContent.trim() === '') && data.posts && data.posts.length > 0) {
+                    fullContent = data.posts.map(post => post.content || '').join('\n\n');
+                }
+                
+                // Check if content is HTML
+                const isHTML = /<[a-z][\s\S]*>/i.test(fullContent);
+                
+                // Format content appropriately
+                let formattedContent = fullContent;
+                if (!isHTML) {
+                    formattedContent = fullContent.replace(/\n/g, '<br>');
+                }
+                
                 const summaryTextEl = document.getElementById('summaryText');
                 if (summaryTextEl) {
-                    summaryTextEl.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #212529; padding: 10px;">${formattedSummary}</div>`;
+                    const contentStyle = isHTML 
+                        ? 'line-height: 1.8; font-size: 16px; color: #212529; padding: 10px;'
+                        : 'white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #212529; padding: 10px;';
+                    
+                    // Add header with metadata
+                    const headerHtml = `
+                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #dee2e6;">
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <span style="font-weight: 600; color: #212529;">${data.student || 'Unknown'}</span>
+                                <span style="color: #6c757d; font-size: 14px;">HW ${data.homework || 'N/A'} • ${data.llm || 'Unknown LLM'}</span>
+                                <span style="color: #868e96; font-size: 12px;">${data.post_count || 0} post(s)</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    summaryTextEl.innerHTML = headerHtml + `<div class="ed-post-content" style="${contentStyle}">${formattedContent}</div>`;
+                    console.log('Displayed full content, length:', fullContent.length, 'isHTML:', isHTML);
                 }
                 
                 // Handle PDF display
@@ -2429,7 +2548,9 @@
                         </div>
                     `;
                 }
+                return true; // Still return true as the search was performed
             }
+            return true; // Search was successful
         }
 
         async function applyFilters() {
@@ -2468,9 +2589,11 @@
             
             // Generate word cloud and sentiment if on Word Cloud tab
             if (activeTab.includes('Word Cloud')) {
-                generateWordCloud(students, homeworks, llms);
-                const sentiment = await fetchSentimentAnalysis(students, homeworks, llms);
-                displaySentiment(llms, sentiment);
+                // Pass filtered posts to generate word cloud from actual content
+                generateWordCloud(posts, llms);
+                // Generate sentiment analysis from actual post content
+                const sentimentResults = analyzeSentiment(posts, llms);
+                displaySentiment(llms, sentimentResults);
             }
         }
 
@@ -2517,9 +2640,16 @@
                 }
                 if (post.llm_agent) metaInfo.push(post.llm_agent);
                 
-                // Check for PDFs
-                const pdfUrls = post.pdf_urls || [];
+                // Check for PDFs - try API data first, then extract from content
+                let pdfUrls = post.pdf_urls || [];
+                if (pdfUrls.length === 0 && (post.content || post.text)) {
+                    pdfUrls = extractPdfsFromContent(post.content || post.text);
+                }
                 const hasPdf = pdfUrls.length > 0;
+                // Store extracted PDFs back to post for later use
+                if (hasPdf && (!post.pdf_urls || post.pdf_urls.length === 0)) {
+                    post.pdf_urls = pdfUrls;
+                }
                 
                 card.innerHTML = `
                     <h3>${post.title || 'Untitled Post'}</h3>
@@ -2539,29 +2669,115 @@
             });
         }
 
-        function generateWordCloud(students, homeworks, llms) {
-            const words = [
-                {text: 'machine learning', size: 50},
-                {text: 'algorithm', size: 45},
-                {text: 'optimization', size: 40},
-                {text: 'debugging', size: 38},
-                {text: 'implementation', size: 35},
-                {text: 'analysis', size: 33},
-                {text: 'performance', size: 30},
-                {text: 'accuracy', size: 28},
-                {text: 'efficient', size: 26},
-                {text: 'complex', size: 24},
-                {text: 'data structures', size: 22},
-                {text: 'natural language', size: 20},
-                {text: 'prompt engineering', size: 18},
-                {text: 'model', size: 16},
-                {text: 'code quality', size: 14}
-            ];
+        function switchPdfView(pdfUrl) {
+            // Update the PDF iframe with the new URL
+            const iframe = document.getElementById('pdfIframe');
+            if (iframe) {
+                iframe.src = pdfUrl;
+            }
+            
+            // Update active state of PDF tab buttons
+            document.querySelectorAll('.pdf-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = '#f8f9fa';
+            });
+            
+            // Find and activate the clicked button
+            event.target.classList.add('active');
+            event.target.style.background = '#FDB515';
+            
+            // Update download link
+            const downloadLink = document.querySelector('#pdfViewer a[download]');
+            if (downloadLink) {
+                downloadLink.href = pdfUrl;
+            }
+        }
 
+        // Common stop words to exclude from word cloud
+        const STOP_WORDS = new Set([
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+            'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after',
+            'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once',
+            'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'few', 'more',
+            'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same',
+            'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should',
+            'now', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you',
+            'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself',
+            'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them',
+            'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this',
+            'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
+            'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing',
+            'would', 'could', 'might', 'must', 'shall', 'if', 'as', 'because', 'while',
+            'although', 'however', 'also', 'like', 'use', 'using', 'used', 'get', 'got',
+            'make', 'made', 'one', 'two', 'first', 'way', 'even', 'new', 'want', 'since',
+            'see', 'time', 'well', 'back', 'come', 'need', 'know', 'take', 'think', 'work',
+            'nbsp', 'amp', 'lt', 'gt', 'quot', 'p', 'br', 'div', 'span', 'class', 'style',
+            'http', 'https', 'www', 'com', 'org', 'edu', 'html', 'css', 'png', 'jpg'
+        ]);
+
+        function extractWordsFromContent(posts) {
+            // Combine all post content
+            let allText = '';
+            posts.forEach(post => {
+                const content = post.content || post.text || post.body || '';
+                // Strip HTML tags
+                const textOnly = content.replace(/<[^>]*>/g, ' ');
+                allText += ' ' + textOnly;
+            });
+            
+            // Clean and tokenize
+            const words = allText.toLowerCase()
+                .replace(/[^a-z\s]/g, ' ')  // Remove non-letters
+                .split(/\s+/)
+                .filter(word => word.length > 2 && !STOP_WORDS.has(word));
+            
+            // Count word frequencies
+            const wordCount = {};
+            words.forEach(word => {
+                wordCount[word] = (wordCount[word] || 0) + 1;
+            });
+            
+            // Sort by frequency and take top words
+            const sortedWords = Object.entries(wordCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 50);  // Top 50 words
+            
+            // Calculate sizes based on frequency
+            if (sortedWords.length === 0) {
+                return [];
+            }
+            
+            const maxCount = sortedWords[0][1];
+            const minSize = 12;
+            const maxSize = 60;
+            
+            return sortedWords.map(([text, count]) => ({
+                text: text,
+                size: minSize + (count / maxCount) * (maxSize - minSize),
+                count: count
+            }));
+        }
+
+        function generateWordCloud(posts, llms) {
             const element = document.getElementById('wordcloud');
             element.innerHTML = '';
             
-            const width = element.offsetWidth;
+            if (!posts || posts.length === 0) {
+                element.innerHTML = '<div class="placeholder" style="display: flex; align-items: center; justify-content: center; height: 300px;"><p>No posts available to generate word cloud</p></div>';
+                return;
+            }
+            
+            // Extract words from actual post content
+            const words = extractWordsFromContent(posts);
+            
+            if (words.length === 0) {
+                element.innerHTML = '<div class="placeholder" style="display: flex; align-items: center; justify-content: center; height: 300px;"><p>No meaningful words found in post content</p></div>';
+                return;
+            }
+            
+            console.log('Word cloud data:', words.slice(0, 10));
+            
+            const width = element.offsetWidth || 800;
             const height = 500;
 
             const berkeleyColors = ['#003262', '#3B7EA1', '#FDB515', '#ED4E33', '#00B0DA'];
@@ -2570,7 +2786,7 @@
                 .size([width, height])
                 .words(words)
                 .padding(5)
-                .rotate(() => 0)
+                .rotate(() => (Math.random() > 0.5 ? 0 : 90 * (Math.random() > 0.5 ? 1 : -1)))
                 .fontSize(d => d.size)
                 .on('end', draw);
 
@@ -2588,12 +2804,124 @@
                     .enter().append('text')
                     .style('font-size', d => `${d.size}px`)
                     .style('fill', (d, i) => berkeleyColors[i % berkeleyColors.length])
-                    .style('font-family', 'Source Sans Pro, sans-serif')
+                    .style('font-family', 'Noto Serif, serif')
                     .style('font-weight', '600')
+                    .style('cursor', 'pointer')
                     .attr('text-anchor', 'middle')
-                    .attr('transform', d => `translate(${d.x},${d.y})`)
-                    .text(d => d.text);
+                    .attr('transform', d => `translate(${d.x},${d.y}) rotate(${d.rotate})`)
+                    .text(d => d.text)
+                    .on('mouseover', function(event, d) {
+                        d3.select(this).style('opacity', 0.7);
+                    })
+                    .on('mouseout', function(event, d) {
+                        d3.select(this).style('opacity', 1);
+                    })
+                    .append('title')
+                    .text(d => `${d.text}: ${d.count} occurrences`);
             }
+        }
+
+        // Simple sentiment analysis using word lists
+        const POSITIVE_WORDS = new Set([
+            'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'awesome',
+            'helpful', 'useful', 'effective', 'efficient', 'correct', 'accurate', 'perfect',
+            'best', 'better', 'improved', 'success', 'successful', 'solved', 'solution',
+            'easy', 'simple', 'clear', 'understand', 'understood', 'learned', 'learning',
+            'fast', 'quick', 'efficient', 'productive', 'save', 'saved', 'saving', 'time',
+            'love', 'like', 'enjoy', 'enjoyed', 'appreciate', 'thanks', 'thank', 'grateful',
+            'impressive', 'remarkable', 'outstanding', 'exceptional', 'superb', 'brilliant',
+            'insightful', 'valuable', 'beneficial', 'advantage', 'positive', 'recommend',
+            'innovative', 'creative', 'smart', 'intelligent', 'clever', 'intuitive',
+            'reliable', 'consistent', 'thorough', 'comprehensive', 'detailed', 'precise',
+            'elegant', 'clean', 'nice', 'pretty', 'beautiful', 'neat', 'organized',
+            'works', 'working', 'worked', 'fixed', 'fix', 'resolved', 'helped', 'assist'
+        ]);
+
+        const NEGATIVE_WORDS = new Set([
+            'bad', 'poor', 'terrible', 'awful', 'horrible', 'wrong', 'incorrect', 'error',
+            'mistake', 'bug', 'bugs', 'fail', 'failed', 'failure', 'problem', 'problems',
+            'issue', 'issues', 'difficult', 'hard', 'complex', 'complicated', 'confusing',
+            'confused', 'frustrating', 'frustrated', 'annoying', 'annoyed', 'slow', 'slower',
+            'broken', 'break', 'crash', 'crashed', 'stuck', 'block', 'blocked', 'missing',
+            'lack', 'lacking', 'incomplete', 'unclear', 'vague', 'ambiguous', 'useless',
+            'waste', 'wasted', 'unhelpful', 'disappointed', 'disappointing', 'unexpected',
+            'unfortunately', 'sadly', 'worse', 'worst', 'hate', 'dislike', 'avoid',
+            'unreliable', 'inconsistent', 'inaccurate', 'misleading', 'false', 'fake',
+            'struggle', 'struggling', 'struggled', 'trouble', 'painful', 'tedious'
+        ]);
+
+        function analyzeSentiment(posts, llms) {
+            const sentimentByLLM = {};
+            
+            // Group posts by LLM
+            const postsByLLM = {};
+            posts.forEach(post => {
+                const llm = post.llm_agent || 'Unknown';
+                if (!postsByLLM[llm]) {
+                    postsByLLM[llm] = [];
+                }
+                postsByLLM[llm].push(post);
+            });
+            
+            // Analyze sentiment for each LLM
+            Object.entries(postsByLLM).forEach(([llm, llmPosts]) => {
+                let positiveCount = 0;
+                let negativeCount = 0;
+                let totalWords = 0;
+                
+                llmPosts.forEach(post => {
+                    const content = (post.content || post.text || post.body || '').toLowerCase();
+                    // Strip HTML and get words
+                    const textOnly = content.replace(/<[^>]*>/g, ' ');
+                    const words = textOnly.replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+                    
+                    words.forEach(word => {
+                        if (POSITIVE_WORDS.has(word)) positiveCount++;
+                        if (NEGATIVE_WORDS.has(word)) negativeCount++;
+                        totalWords++;
+                    });
+                });
+                
+                // Calculate sentiment score (-1 to 1)
+                const totalSentimentWords = positiveCount + negativeCount;
+                let score = 0;
+                let sentiment = 'neutral';
+                
+                if (totalSentimentWords > 0) {
+                    score = (positiveCount - negativeCount) / totalSentimentWords;
+                    // Normalize to 0-1 range for display
+                    const normalizedScore = (score + 1) / 2;
+                    
+                    if (score > 0.2) {
+                        sentiment = 'positive';
+                    } else if (score < -0.2) {
+                        sentiment = 'negative';
+                    } else {
+                        sentiment = 'neutral';
+                    }
+                    
+                    sentimentByLLM[llm] = {
+                        score: normalizedScore,
+                        sentiment: sentiment,
+                        positiveWords: positiveCount,
+                        negativeWords: negativeCount,
+                        postCount: llmPosts.length,
+                        totalWords: totalWords
+                    };
+                } else {
+                    sentimentByLLM[llm] = {
+                        score: 0.5,
+                        sentiment: 'neutral',
+                        positiveWords: 0,
+                        negativeWords: 0,
+                        postCount: llmPosts.length,
+                        totalWords: totalWords
+                    };
+                }
+            });
+            
+            console.log('Sentiment analysis results:', sentimentByLLM);
+            return sentimentByLLM;
         }
 
         function displaySentiment(selectedLLMs, sentimentDataParam = null) {
@@ -2606,17 +2934,33 @@
                 : Object.entries(dataToUse);
 
             if (dataToDisplay.length === 0) {
-                grid.innerHTML = '<p class="placeholder">No sentiment data available for selected LLMs</p>';
+                grid.innerHTML = '<p class="placeholder">No sentiment data available. Select filters and click Search to analyze posts.</p>';
                 return;
             }
 
             dataToDisplay.forEach(([llm, data]) => {
                 const card = document.createElement('div');
                 card.className = `sentiment-card ${data.sentiment || 'neutral'}`;
+                
+                // Get sentiment emoji
+                let emoji = '😐';
+                if (data.sentiment === 'positive') emoji = '😊';
+                else if (data.sentiment === 'negative') emoji = '😞';
+                
+                // Calculate percentage
+                const percentage = ((data.score || 0.5) * 100).toFixed(0);
+                
                 card.innerHTML = `
                     <div class="llm-name">${llm}</div>
-                    <div class="sentiment-score">${((data.score || 0) * 100).toFixed(0)}%</div>
-                    <div style="color: #6c757d; font-size: 14px; text-transform: capitalize;">${data.sentiment || 'neutral'}</div>
+                    <div class="sentiment-score">${emoji} ${percentage}%</div>
+                    <div style="color: #6c757d; font-size: 14px; text-transform: capitalize; margin-bottom: 8px;">${data.sentiment || 'neutral'}</div>
+                    <div style="font-size: 12px; color: #868e96; border-top: 1px solid #dee2e6; padding-top: 8px; margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="color: #28a745;">👍 ${data.positiveWords || 0} positive</span>
+                            <span style="color: #dc3545;">👎 ${data.negativeWords || 0} negative</span>
+                        </div>
+                        <div>📝 ${data.postCount || 0} post${data.postCount !== 1 ? 's' : ''} analyzed</div>
+                    </div>
                 `;
                 grid.appendChild(card);
             });

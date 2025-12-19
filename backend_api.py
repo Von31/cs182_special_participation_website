@@ -368,25 +368,38 @@ async def get_submission(
             unique_pdf_urls.append(url)
     pdf_urls = unique_pdf_urls
     
-    # Generate summary from post contents
-    # If we have matching posts, use their content; otherwise generate a summary
+    # Get full content from matching posts
+    full_content = ""
     if matching_posts:
+        # Combine all post contents - return FULL content, not truncated
+        for post in matching_posts:
+            post_content = post.get('content', '')
+            post_title = post.get('title', 'Untitled')
+            post_author = post.get('author', 'Unknown')
+            if post_content:
+                full_content += post_content + "\n\n"
+        
+        # Also generate executive summary for reference
         summary = generate_executive_summary(matching_posts)
     else:
         # If no matching posts, create a simple message
         summary = f"No posts found for {student} on Homework {homework} using {llm}."
+        full_content = summary
     
     # Use first PDF URL if available
     pdf_url = pdf_urls[0] if pdf_urls else None
     
     result = {
         "summary": summary,
+        "content": full_content.strip(),  # Full post content
+        "full_content": full_content.strip(),  # Alias for full content
         "pdfUrl": pdf_url,
         "pdfUrls": pdf_urls,  # All PDF URLs
         "student": student,
         "homework": homework,
         "llm": llm,
-        "post_count": len(matching_posts)
+        "post_count": len(matching_posts),
+        "posts": matching_posts  # Include full post data
     }
     
     # Merge with submission data if exists
