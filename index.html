@@ -3469,6 +3469,27 @@
                 description: 'Ability to solve complex problems',
                 positiveKeywords: ['solved', 'solution', 'figured out', 'resolved', 'answered', 'addressed', 'tackled', 'overcame', 'breakthrough'],
                 negativeKeywords: ['couldn\'t solve', 'stuck', 'blocked', 'no solution', 'gave up', 'incomplete', 'partial']
+            },
+            generalExperience: {
+                name: 'Overall Experience',
+                icon: '📝',
+                description: 'General feedback and experience',
+                positiveKeywords: ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'awesome', 'love', 'loved', 'like', 'liked', 'enjoy', 'enjoyed', 'appreciate', 'impressed', 'recommend', 'best', 'better', 'improved', 'success', 'successful'],
+                negativeKeywords: ['bad', 'poor', 'terrible', 'awful', 'horrible', 'hate', 'hated', 'dislike', 'disappointed', 'disappointing', 'frustrating', 'frustrated', 'annoying', 'annoyed', 'worse', 'worst', 'unfortunately', 'sadly']
+            },
+            issuesProblems: {
+                name: 'Issues & Problems',
+                icon: '⚠️',
+                description: 'Encountered issues and difficulties',
+                positiveKeywords: ['no issues', 'no problems', 'worked perfectly', 'flawless', 'smooth', 'seamless'],
+                negativeKeywords: ['problem', 'problems', 'issue', 'issues', 'mistake', 'mistakes', 'fail', 'failed', 'failure', 'difficult', 'difficulty', 'hard', 'struggle', 'struggling', 'struggled', 'trouble', 'painful', 'challenging']
+            },
+            limitations: {
+                name: 'Limitations',
+                icon: '🚧',
+                description: 'LLM limitations and boundaries',
+                positiveKeywords: ['capable', 'powerful', 'versatile', 'flexible', 'handles well'],
+                negativeKeywords: ['limitation', 'limitations', 'limited', 'cannot', 'unable', 'lacks', 'lacking', 'missing', 'doesn\'t understand', 'misunderstood', 'out of date', 'outdated', 'hallucinate', 'hallucinated', 'hallucination', 'made up', 'invented', 'fabricated']
             }
         };
 
@@ -3574,17 +3595,26 @@
             });
             
             // Aggregate results into positive and negative themes
+            // Changed logic: show themes in BOTH columns if they have significant mentions
+            // This ensures negative feedback is shown even when positive mentions exist
             const positiveThemes = [];
             const negativeThemes = [];
             
+            // Calculate max counts for relative sizing
+            let maxPositiveCount = 1;
+            let maxNegativeCount = 1;
             Object.keys(themeResults).forEach(themeKey => {
                 const theme = themeResults[themeKey];
-                const netScore = theme.positiveCount - theme.negativeCount;
-                
-                // Calculate relative strength (for progress bar)
+                if (theme.positiveCount > maxPositiveCount) maxPositiveCount = theme.positiveCount;
+                if (theme.negativeCount > maxNegativeCount) maxNegativeCount = theme.negativeCount;
+            });
+            
+            Object.keys(themeResults).forEach(themeKey => {
+                const theme = themeResults[themeKey];
                 const totalMentions = theme.positiveCount + theme.negativeCount;
                 
-                if (theme.positiveCount > 0 && netScore > 0) {
+                // Show in positive column if has positive mentions (minimum 1)
+                if (theme.positiveCount > 0) {
                     positiveThemes.push({
                         key: themeKey,
                         name: theme.name,
@@ -3594,11 +3624,14 @@
                         totalMentions: totalMentions,
                         keywords: [...new Set(theme.positiveMentions)].slice(0, 5),
                         examples: theme.exampleSentences.positive,
-                        strength: totalMentions > 0 ? (theme.positiveCount / totalMentions) : 0
+                        // Strength relative to max positive count for better visualization
+                        strength: theme.positiveCount / maxPositiveCount
                     });
                 }
                 
-                if (theme.negativeCount > 0 && netScore <= 0) {
+                // Show in negative column if has negative mentions (minimum 1)
+                // Previously required netScore <= 0, now shows ANY negative mentions
+                if (theme.negativeCount > 0) {
                     negativeThemes.push({
                         key: themeKey,
                         name: theme.name,
@@ -3608,7 +3641,8 @@
                         totalMentions: totalMentions,
                         keywords: [...new Set(theme.negativeMentions)].slice(0, 5),
                         examples: theme.exampleSentences.negative,
-                        strength: totalMentions > 0 ? (theme.negativeCount / totalMentions) : 0
+                        // Strength relative to max negative count for better visualization
+                        strength: theme.negativeCount / maxNegativeCount
                     });
                 }
             });
