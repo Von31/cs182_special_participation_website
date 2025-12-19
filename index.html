@@ -3358,6 +3358,118 @@
             });
         }
 
+        // Negation words that flip sentiment
+        const NEGATION_WORDS = new Set([
+            'not', 'no', 'never', 'neither', 'nobody', 'nothing', 'nowhere',
+            'without', 'hardly', 'barely', 'scarcely', 'seldom', 'rarely',
+            "don't", "doesn't", "didn't", "won't", "wouldn't", "couldn't",
+            "shouldn't", "can't", "cannot", "isn't", "aren't", "wasn't", "weren't"
+        ]);
+
+        // Transition words that indicate sentiment shift (what comes after matters more)
+        const CONTRAST_WORDS = new Set([
+            'but', 'however', 'although', 'though', 'yet', 'still', 'nevertheless',
+            'nonetheless', 'despite', 'instead', 'whereas', 'while', 'except',
+            'unfortunately', 'fortunately', 'finally', 'eventually', 'ultimately'
+        ]);
+
+        // Intensifier words that amplify sentiment
+        const INTENSIFIERS = new Set([
+            'very', 'really', 'extremely', 'incredibly', 'absolutely', 'completely',
+            'totally', 'highly', 'super', 'so', 'too', 'especially', 'particularly',
+            'remarkably', 'exceptionally', 'definitely', 'certainly', 'truly'
+        ]);
+
+        // Analyze sentiment of a single sentence with context awareness
+        function analyzeSentenceSentiment(sentence) {
+            const lowerSentence = sentence.toLowerCase();
+            const words = lowerSentence.replace(/[^a-z'\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+            
+            let score = 0;
+            let positiveKeywords = [];
+            let negativeKeywords = [];
+            let isNegated = false;
+            let intensifierActive = false;
+            let afterContrast = false;
+            let contrastIndex = -1;
+            
+            // Find if there's a contrast word and where it is
+            for (let i = 0; i < words.length; i++) {
+                if (CONTRAST_WORDS.has(words[i])) {
+                    contrastIndex = i;
+                    afterContrast = true;
+                    break;
+                }
+            }
+            
+            // Process each word with context
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                const prevWord = i > 0 ? words[i - 1] : '';
+                const prevPrevWord = i > 1 ? words[i - 2] : '';
+                
+                // Check for negation in the previous 1-3 words
+                isNegated = NEGATION_WORDS.has(prevWord) || 
+                            NEGATION_WORDS.has(prevPrevWord) ||
+                            (i > 2 && NEGATION_WORDS.has(words[i - 3]));
+                
+                // Check for intensifier
+                intensifierActive = INTENSIFIERS.has(prevWord);
+                
+                // Calculate position weight: words after contrast get 2x weight
+                let positionWeight = 1;
+                if (afterContrast && i > contrastIndex) {
+                    positionWeight = 2;
+                } else if (afterContrast && i < contrastIndex) {
+                    positionWeight = 0.5; // Words before contrast get less weight
+                }
+                
+                // Apply intensifier multiplier
+                const intensifierMultiplier = intensifierActive ? 1.5 : 1;
+                
+                // Calculate word sentiment
+                let wordScore = 0;
+                if (POSITIVE_WORDS.has(word)) {
+                    if (isNegated) {
+                        wordScore = -1; // "not good" is negative
+                        negativeKeywords.push(`not ${word}`);
+                    } else {
+                        wordScore = 1;
+                        positiveKeywords.push(word);
+                    }
+                } else if (NEGATIVE_WORDS.has(word)) {
+                    if (isNegated) {
+                        wordScore = 0.7; // "not bad" is mildly positive
+                        positiveKeywords.push(`not ${word}`);
+                    } else {
+                        wordScore = -1;
+                        negativeKeywords.push(word);
+                    }
+                }
+                
+                // Apply weights
+                score += wordScore * positionWeight * intensifierMultiplier;
+            }
+            
+            // Determine final sentiment based on aggregated score
+            let sentiment = 'neutral';
+            let confidence = Math.abs(score);
+            
+            if (score > 0.5) {
+                sentiment = 'positive';
+            } else if (score < -0.5) {
+                sentiment = 'negative';
+            }
+            
+            return {
+                sentiment,
+                score,
+                confidence,
+                positiveKeywords: [...new Set(positiveKeywords)],
+                negativeKeywords: [...new Set(negativeKeywords)]
+            };
+        }
+
         // Extract sentences with sentiment from posts
         function extractSentimentSentences(posts) {
             const positiveSentences = [];
@@ -3372,46 +3484,40 @@
                 // Strip HTML and split into sentences
                 const textOnly = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
                 // Split by sentence-ending punctuation while keeping the punctuation
-                const sentences = textOnly.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 10);
+                const sentences = textOnly.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 15);
                 
                 sentences.forEach(sentence => {
-                    const lowerSentence = sentence.toLowerCase();
-                    const words = lowerSentence.replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+                    // Analyze the entire sentence for aggregate sentiment
+                    const analysis = analyzeSentenceSentiment(sentence);
                     
-                    let positiveMatches = [];
-                    let negativeMatches = [];
-                    
-                    words.forEach(word => {
-                        if (POSITIVE_WORDS.has(word)) positiveMatches.push(word);
-                        if (NEGATIVE_WORDS.has(word)) negativeMatches.push(word);
-                    });
-                    
-                    // Determine if sentence is predominantly positive or negative
-                    if (positiveMatches.length > negativeMatches.length && positiveMatches.length >= 1) {
+                    // Only include sentences with clear sentiment (confidence threshold)
+                    if (analysis.sentiment === 'positive' && analysis.confidence >= 0.5) {
                         positiveSentences.push({
                             text: sentence.trim(),
                             author: author,
                             llm: llm,
                             title: postTitle,
-                            keywords: [...new Set(positiveMatches)].slice(0, 4),
-                            score: positiveMatches.length
+                            keywords: analysis.positiveKeywords.slice(0, 4),
+                            score: analysis.score,
+                            confidence: analysis.confidence
                         });
-                    } else if (negativeMatches.length > 0 && negativeMatches.length >= positiveMatches.length) {
+                    } else if (analysis.sentiment === 'negative' && analysis.confidence >= 0.5) {
                         negativeSentences.push({
                             text: sentence.trim(),
                             author: author,
                             llm: llm,
                             title: postTitle,
-                            keywords: [...new Set(negativeMatches)].slice(0, 4),
-                            score: negativeMatches.length
+                            keywords: analysis.negativeKeywords.slice(0, 4),
+                            score: Math.abs(analysis.score),
+                            confidence: analysis.confidence
                         });
                     }
                 });
             });
             
-            // Sort by score (number of sentiment words) and limit
-            positiveSentences.sort((a, b) => b.score - a.score);
-            negativeSentences.sort((a, b) => b.score - a.score);
+            // Sort by confidence/score (strongest sentiment first)
+            positiveSentences.sort((a, b) => b.confidence - a.confidence);
+            negativeSentences.sort((a, b) => b.confidence - a.confidence);
             
             return {
                 positive: positiveSentences,
