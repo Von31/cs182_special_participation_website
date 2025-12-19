@@ -2489,8 +2489,8 @@
             const patterns = [
                 // Google Drive file URLs
                 /href=["']?(https?:\/\/drive\.google\.com\/file\/d\/[^"'\s>]+)["']?/gi,
-                // Google Drive direct URLs in content
-                /(https?:\/\/drive\.google\.com\/file\/d\/[^\s"'<>]+)/gi,
+                // Google Drive direct URLs in content (exclude trailing brackets)
+                /(https?:\/\/drive\.google\.com\/file\/d\/[^\s"'<>()[\]]+)/gi,
                 // Ed static file URLs (most common for Ed attachments)
                 /href=["']?(https?:\/\/static\.us\.edusercontent\.com\/files\/[^"'\s>]+)["']?/gi,
                 // Standard PDF links
@@ -2503,14 +2503,14 @@
                 /href=["']([^"']*edusercontent\.com\/files[^"']*)['"]/gi,
                 // Any file download links
                 /<a[^>]*href=["']([^"']+)["'][^>]*download[^>]*>/gi,
-                // Direct URLs ending in .pdf
-                /(https?:\/\/[^\s"'<>]+\.pdf)/gi,
+                // Direct URLs ending in .pdf (exclude trailing brackets)
+                /(https?:\/\/[^\s"'<>()[\]]+\.pdf)/gi,
                 // src attributes for embedded files
                 /src=["']?(https?:\/\/static\.us\.edusercontent\.com\/files\/[^"'\s>]+)["']?/gi,
                 // GitHub Pages URLs (github.io)
-                /href=["']?(https?:\/\/[a-zA-Z0-9_-]+\.github\.io[^"'\s>]*)["']?/gi,
-                // GitHub Pages direct URLs in content
-                /(https?:\/\/[a-zA-Z0-9_-]+\.github\.io[^\s"'<>]*)/gi,
+                /href=["']?(https?:\/\/[a-zA-Z0-9_-]+\.github\.io[^"'\s>()]*)["']?/gi,
+                // GitHub Pages direct URLs in content (exclude trailing parentheses/brackets)
+                /(https?:\/\/[a-zA-Z0-9_-]+\.github\.io[^\s"'<>()[\]]*)/gi,
             ];
             
             for (const pattern of patterns) {
@@ -2520,8 +2520,8 @@
                 while ((match = pattern.exec(content)) !== null) {
                     const url = match[1];
                     if (url && !pdfUrls.includes(url)) {
-                        // Clean up the URL (remove trailing quotes or spaces)
-                        const cleanUrl = url.replace(/["'\s>]+$/, '').trim();
+                        // Clean up the URL (remove trailing quotes, spaces, brackets, parentheses)
+                        const cleanUrl = url.replace(/["'\s>()[\]]+$/, '').trim();
                         if (cleanUrl && !pdfUrls.includes(cleanUrl)) {
                             pdfUrls.push(cleanUrl);
                             console.log('Found file URL:', cleanUrl);
