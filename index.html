@@ -2386,35 +2386,62 @@
                     
                     // Add PDF header with count
                     pdfHtml += `<div style="margin-bottom: 15px; text-align: center;">
-                        <h4 style="color: #003262; margin-bottom: 10px;">📄 PDF Attachment${pdfUrls.length > 1 ? 's' : ''} (${pdfUrls.length})</h4>
+                        <h4 style="color: #003262; margin-bottom: 10px;">📄 Attachment${pdfUrls.length > 1 ? 's' : ''} / Link${pdfUrls.length > 1 ? 's' : ''} (${pdfUrls.length})</h4>
                     </div>`;
                     
-                    // If multiple PDFs, show tabs/buttons to switch between them
+                    // Prominent "Open Link" buttons for ALL attachments
+                    pdfHtml += '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">';
+                    pdfUrls.forEach((url, index) => {
+                        const linkType = getLinkType(url);
+                        const icon = linkType.icon;
+                        const label = linkType.label;
+                        pdfHtml += `<a href="${url}" target="_blank" rel="noopener noreferrer"
+                            style="display: inline-flex; align-items: center; gap: 8px; color: white; font-weight: 600; text-decoration: none; padding: 12px 20px; background: linear-gradient(135deg, #003262, #004080); border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,50,98,0.3);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,50,98,0.4)';"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,50,98,0.3)';">
+                            ${icon} ${pdfUrls.length > 1 ? `Open ${label} ${index + 1}` : `Open ${label}`}
+                        </a>`;
+                    });
+                    pdfHtml += '</div>';
+                    
+                    // If multiple files, show tabs/buttons to switch preview
                     if (pdfUrls.length > 1) {
-                        pdfHtml += '<div style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">';
+                        pdfHtml += '<div style="margin-bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">';
                         pdfUrls.forEach((url, index) => {
                             pdfHtml += `<button onclick="switchPdfView('${url.replace(/'/g, "\\'")}')" 
-                                style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: ${index === 0 ? '#FDB515' : '#f8f9fa'}; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+                                style="color: #003262; font-weight: 600; text-decoration: none; padding: 8px 15px; background: ${index === 0 ? '#FDB515' : '#f8f9fa'}; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 13px;"
                                 class="pdf-tab-btn ${index === 0 ? 'active' : ''}"
                                 onmouseover="if(!this.classList.contains('active')) this.style.background='#e9ecef'"
                                 onmouseout="if(!this.classList.contains('active')) this.style.background='#f8f9fa'">
-                                PDF ${index + 1}
+                                Preview ${index + 1}
                             </button>`;
                         });
                         pdfHtml += '</div>';
                     }
                     
-                    // Add download link
-                    pdfHtml += `<div style="margin-bottom: 10px; text-align: center;">
-                        <a href="${pdfUrls[0]}" target="_blank" download style="color: #003262; font-size: 14px; text-decoration: none;">
-                            ⬇️ Open in new tab / Download
-                        </a>
-                    </div>`;
+                    // Check if URL is embeddable
+                    const isEmbeddable = canEmbed(pdfUrls[0]);
                     
-                    // PDF iframe container - use getEmbedUrl for Google Drive etc.
-                    pdfHtml += `<div id="pdfIframeContainer" style="width: 100%; height: 550px; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
-                        <iframe id="pdfIframe" src="${getEmbedUrl(pdfUrls[0])}" width="100%" height="100%" style="border: none;" allow="autoplay"></iframe>
-                    </div>`;
+                    if (isEmbeddable) {
+                        // PDF iframe container - use getEmbedUrl for Google Drive etc.
+                        pdfHtml += `<div id="pdfIframeContainer" style="width: 100%; height: 550px; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+                            <iframe id="pdfIframe" src="${getEmbedUrl(pdfUrls[0])}" width="100%" height="100%" style="border: none;" allow="autoplay"></iframe>
+                        </div>`;
+                    } else {
+                        // Show a nice fallback for non-embeddable links
+                        const linkType = getLinkType(pdfUrls[0]);
+                        pdfHtml += `<div id="pdfIframeContainer" style="width: 100%; height: 300px; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+                            <div style="font-size: 64px; margin-bottom: 15px;">${linkType.icon}</div>
+                            <p style="color: #003262; font-weight: 600; font-size: 18px; margin-bottom: 10px;">${linkType.label} Link</p>
+                            <p style="color: #6c757d; font-size: 14px; margin-bottom: 20px; text-align: center; max-width: 300px;">This link cannot be previewed here. Click the button above to open it in a new tab.</p>
+                            <a href="${pdfUrls[0]}" target="_blank" rel="noopener noreferrer"
+                                style="display: inline-flex; align-items: center; gap: 8px; color: white; font-weight: 600; text-decoration: none; padding: 12px 24px; background: #FDB515; color: #003262; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='#e5a313';"
+                                onmouseout="this.style.background='#FDB515';">
+                                🔗 Open Link
+                            </a>
+                        </div>`;
+                    }
                     
                     pdfViewerEl.innerHTML = pdfHtml;
                     pdfViewerEl.style.display = 'block';
@@ -2708,6 +2735,66 @@
             });
         }
 
+        // Detect link type for display purposes
+        function getLinkType(url) {
+            if (!url) return { icon: '📄', label: 'File' };
+            
+            const urlLower = url.toLowerCase();
+            
+            if (urlLower.includes('drive.google.com')) {
+                return { icon: '📁', label: 'Google Drive' };
+            } else if (urlLower.includes('github.com') || urlLower.includes('github.io')) {
+                return { icon: '🐙', label: 'GitHub' };
+            } else if (urlLower.includes('gemini.google.com')) {
+                return { icon: '✨', label: 'Gemini Chat' };
+            } else if (urlLower.includes('chat.openai.com') || urlLower.includes('chatgpt.com')) {
+                return { icon: '🤖', label: 'ChatGPT' };
+            } else if (urlLower.includes('claude.ai')) {
+                return { icon: '🧠', label: 'Claude' };
+            } else if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+                return { icon: '▶️', label: 'YouTube' };
+            } else if (urlLower.includes('colab.research.google.com')) {
+                return { icon: '📓', label: 'Colab Notebook' };
+            } else if (urlLower.includes('.pdf')) {
+                return { icon: '📄', label: 'PDF' };
+            } else if (urlLower.includes('edusercontent.com') || urlLower.includes('edstem.org')) {
+                return { icon: '📎', label: 'Ed File' };
+            } else if (urlLower.includes('notion.so') || urlLower.includes('notion.site')) {
+                return { icon: '📝', label: 'Notion' };
+            } else if (urlLower.includes('docs.google.com')) {
+                return { icon: '📄', label: 'Google Doc' };
+            } else {
+                return { icon: '🔗', label: 'Link' };
+            }
+        }
+        
+        // Check if URL can be embedded in an iframe
+        function canEmbed(url) {
+            if (!url) return false;
+            
+            const urlLower = url.toLowerCase();
+            
+            // URLs that CAN be embedded
+            if (urlLower.includes('edusercontent.com')) return true;
+            if (urlLower.includes('edstem.org/api/files')) return true;
+            if (urlLower.endsWith('.pdf')) return true;
+            if (urlLower.includes('drive.google.com/file/d/')) return true; // Google Drive preview works
+            if (urlLower.includes('youtube.com/embed')) return true;
+            
+            // URLs that CANNOT be embedded (due to X-Frame-Options or CSP)
+            if (urlLower.includes('github.com')) return false;
+            if (urlLower.includes('gemini.google.com')) return false;
+            if (urlLower.includes('chat.openai.com')) return false;
+            if (urlLower.includes('chatgpt.com')) return false;
+            if (urlLower.includes('claude.ai')) return false;
+            if (urlLower.includes('notion.so')) return false;
+            if (urlLower.includes('notion.site')) return false;
+            if (urlLower.includes('docs.google.com')) return false;
+            
+            // Default: try to embed (most direct file URLs work)
+            return true;
+        }
+        
         // Convert file URLs to embeddable format
         function getEmbedUrl(url) {
             if (!url) return url;
@@ -2723,14 +2810,54 @@
                 }
             }
             
+            // Convert YouTube watch URLs to embed format
+            if (url.includes('youtube.com/watch')) {
+                const match = url.match(/[?&]v=([^&]+)/);
+                if (match && match[1]) {
+                    return `https://www.youtube.com/embed/${match[1]}`;
+                }
+            }
+            if (url.includes('youtu.be/')) {
+                const match = url.match(/youtu\.be\/([^?]+)/);
+                if (match && match[1]) {
+                    return `https://www.youtube.com/embed/${match[1]}`;
+                }
+            }
+            
             return url;
         }
 
         function switchPdfView(pdfUrl) {
-            // Update the PDF iframe with the new URL (convert to embed format)
-            const iframe = document.getElementById('pdfIframe');
-            if (iframe) {
-                iframe.src = getEmbedUrl(pdfUrl);
+            const container = document.getElementById('pdfIframeContainer');
+            
+            // Check if URL is embeddable
+            const isEmbeddable = canEmbed(pdfUrl);
+            
+            if (isEmbeddable) {
+                // Update the PDF iframe with the new URL (convert to embed format)
+                const iframe = document.getElementById('pdfIframe');
+                if (iframe) {
+                    iframe.src = getEmbedUrl(pdfUrl);
+                } else if (container) {
+                    // Create iframe if it doesn't exist
+                    container.innerHTML = `<iframe id="pdfIframe" src="${getEmbedUrl(pdfUrl)}" width="100%" height="100%" style="border: none;" allow="autoplay"></iframe>`;
+                }
+            } else if (container) {
+                // Show fallback for non-embeddable links
+                const linkType = getLinkType(pdfUrl);
+                container.innerHTML = `
+                    <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+                        <div style="font-size: 64px; margin-bottom: 15px;">${linkType.icon}</div>
+                        <p style="color: #003262; font-weight: 600; font-size: 18px; margin-bottom: 10px;">${linkType.label} Link</p>
+                        <p style="color: #6c757d; font-size: 14px; margin-bottom: 20px; text-align: center; max-width: 300px;">This link cannot be previewed here. Click the button to open it.</p>
+                        <a href="${pdfUrl}" target="_blank" rel="noopener noreferrer"
+                            style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none; padding: 12px 24px; background: #FDB515; color: #003262; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#e5a313';"
+                            onmouseout="this.style.background='#FDB515';">
+                            🔗 Open Link
+                        </a>
+                    </div>
+                `;
             }
             
             // Update active state of PDF tab buttons
@@ -2740,13 +2867,9 @@
             });
             
             // Find and activate the clicked button
-            event.target.classList.add('active');
-            event.target.style.background = '#FDB515';
-            
-            // Update download link
-            const downloadLink = document.querySelector('#pdfViewer a[download]');
-            if (downloadLink) {
-                downloadLink.href = pdfUrl;
+            if (event && event.target) {
+                event.target.classList.add('active');
+                event.target.style.background = '#FDB515';
             }
         }
 
