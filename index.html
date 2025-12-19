@@ -485,14 +485,14 @@
             color: #003262;
         }
 
-        /* Sentiment Sentences Summary Styles */
-        .sentiment-sentences-section {
+        /* Theme Summary Styles */
+        .themes-section {
             margin-top: 50px;
             padding-top: 30px;
             border-top: 2px solid #e9ecef;
         }
 
-        .sentiment-sentences-container {
+        .themes-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
@@ -500,27 +500,27 @@
         }
 
         @media (max-width: 768px) {
-            .sentiment-sentences-container {
+            .themes-container {
                 grid-template-columns: 1fr;
             }
         }
 
-        .sentences-column {
+        .themes-column {
             background: white;
             border-radius: 12px;
             padding: 24px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
 
-        .sentences-column.positive {
+        .themes-column.positive {
             border-top: 4px solid #28a745;
         }
 
-        .sentences-column.negative {
+        .themes-column.negative {
             border-top: 4px solid #dc3545;
         }
 
-        .sentences-column-header {
+        .themes-column-header {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -529,18 +529,18 @@
             border-bottom: 1px solid #e9ecef;
         }
 
-        .sentences-column-header .emoji {
+        .themes-column-header .emoji {
             font-size: 28px;
         }
 
-        .sentences-column-header h4 {
+        .themes-column-header h4 {
             margin: 0;
             font-size: 18px;
             font-weight: 700;
             color: #003262;
         }
 
-        .sentences-column-header .count {
+        .themes-column-header .count {
             margin-left: auto;
             background: #f8f9fa;
             padding: 4px 12px;
@@ -550,107 +550,147 @@
             color: #6c757d;
         }
 
-        .sentence-item {
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.6;
-            position: relative;
+        .theme-card {
+            padding: 16px;
+            margin-bottom: 14px;
+            border-radius: 10px;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .sentence-item:hover {
-            transform: translateX(4px);
+        .theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .sentence-item.positive {
+        .theme-card.positive {
             background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
-            border-left: 3px solid #28a745;
+            border-left: 4px solid #28a745;
         }
 
-        .sentence-item.negative {
+        .theme-card.negative {
             background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
-            border-left: 3px solid #dc3545;
+            border-left: 4px solid #dc3545;
         }
 
-        .sentence-item .sentence-text {
-            color: #343a40;
-        }
-
-        .sentence-item .sentence-meta {
+        .theme-card-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0,0,0,0.08);
-            font-size: 12px;
-            color: #6c757d;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
-        .sentence-item .author-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(0,50,98,0.08);
+        .theme-card-header .theme-icon {
+            font-size: 22px;
+        }
+
+        .theme-card-header .theme-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003262;
+            flex: 1;
+        }
+
+        .theme-card-header .mention-count {
+            background: rgba(0,50,98,0.1);
             padding: 3px 10px;
             border-radius: 12px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
+            color: #003262;
         }
 
-        .sentence-item .keywords {
+        .theme-card.positive .mention-count {
+            background: rgba(40,167,69,0.2);
+            color: #1e7e34;
+        }
+
+        .theme-card.negative .mention-count {
+            background: rgba(220,53,69,0.2);
+            color: #c82333;
+        }
+
+        .theme-description {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .theme-keywords {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 6px;
+            margin-bottom: 12px;
         }
 
-        .sentence-item .keyword {
+        .theme-keyword {
             background: rgba(0,0,0,0.06);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: 500;
+            color: #495057;
         }
 
-        .sentence-item.positive .keyword {
+        .theme-card.positive .theme-keyword {
             background: rgba(40,167,69,0.15);
             color: #1e7e34;
         }
 
-        .sentence-item.negative .keyword {
+        .theme-card.negative .theme-keyword {
             background: rgba(220,53,69,0.15);
             color: #c82333;
         }
 
-        .sentences-empty {
+        .theme-example {
+            background: rgba(255,255,255,0.7);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #6c757d;
+            font-style: italic;
+            border-left: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .theme-example::before {
+            content: '"';
+        }
+
+        .theme-example::after {
+            content: '"';
+        }
+
+        .themes-empty {
             text-align: center;
             padding: 40px 20px;
             color: #868e96;
         }
 
-        .sentences-empty .emoji {
+        .themes-empty .emoji {
             font-size: 48px;
             margin-bottom: 12px;
         }
 
-        .show-more-btn {
-            width: 100%;
-            padding: 12px;
+        .theme-progress-bar {
+            height: 6px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 3px;
             margin-top: 10px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            color: #003262;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+            overflow: hidden;
         }
 
-        .show-more-btn:hover {
-            background: #003262;
-            color: white;
-            border-color: #003262;
+        .theme-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .theme-card.positive .theme-progress-fill {
+            background: linear-gradient(90deg, #28a745, #5cb85c);
+        }
+
+        .theme-card.negative .theme-progress-fill {
+            background: linear-gradient(90deg, #dc3545, #e57373);
         }
 
         h3 {
@@ -1228,39 +1268,39 @@
                     <p class="placeholder">Select filters above and click Search to see analysis</p>
                 </div>
 
-                <!-- Sentiment Sentences Summary Section -->
-                <div class="sentiment-sentences-section" id="sentimentSentencesSection">
-                    <h3 style="margin-bottom: 10px; color: #003262;">📊 Sentiment Summary from Posts</h3>
+                <!-- Common Themes Summary Section -->
+                <div class="themes-section" id="themesSection">
+                    <h3 style="margin-bottom: 10px; color: #003262;">📊 Common Themes from Posts</h3>
                     <p style="color: #6c757d; margin-bottom: 20px; font-size: 14px;">
-                        Key positive and negative sentences extracted from the filtered Ed discussion posts
+                        Aggregated themes showing what students found helpful vs challenging when using LLM agents
                     </p>
-                    <div class="sentiment-sentences-container" id="sentimentSentencesContainer">
-                        <!-- Positive Sentences Column -->
-                        <div class="sentences-column positive" id="positiveSentencesColumn">
-                            <div class="sentences-column-header">
-                                <span class="emoji">😊</span>
-                                <h4>Positive Sentences</h4>
-                                <span class="count" id="positiveCount">0 found</span>
+                    <div class="themes-container" id="themesContainer">
+                        <!-- What Worked Well Column -->
+                        <div class="themes-column positive" id="positiveThemesColumn">
+                            <div class="themes-column-header">
+                                <span class="emoji">✅</span>
+                                <h4>What Worked Well</h4>
+                                <span class="count" id="positiveThemesCount">0 themes</span>
                             </div>
-                            <div id="positiveSentencesList">
-                                <div class="sentences-empty">
-                                    <div class="emoji">💬</div>
-                                    <p>Select filters and click Search to find positive sentences</p>
+                            <div id="positiveThemesList">
+                                <div class="themes-empty">
+                                    <div class="emoji">🔍</div>
+                                    <p>Select filters and click Search to discover positive themes</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Negative Sentences Column -->
-                        <div class="sentences-column negative" id="negativeSentencesColumn">
-                            <div class="sentences-column-header">
-                                <span class="emoji">😔</span>
-                                <h4>Negative Sentences</h4>
-                                <span class="count" id="negativeCount">0 found</span>
+                        <!-- Challenges & Issues Column -->
+                        <div class="themes-column negative" id="negativeThemesColumn">
+                            <div class="themes-column-header">
+                                <span class="emoji">⚠️</span>
+                                <h4>Challenges & Issues</h4>
+                                <span class="count" id="negativeThemesCount">0 themes</span>
                             </div>
-                            <div id="negativeSentencesList">
-                                <div class="sentences-empty">
-                                    <div class="emoji">💬</div>
-                                    <p>Select filters and click Search to find negative sentences</p>
+                            <div id="negativeThemesList">
+                                <div class="themes-empty">
+                                    <div class="emoji">🔍</div>
+                                    <p>Select filters and click Search to discover challenge areas</p>
                                 </div>
                             </div>
                         </div>
@@ -2868,10 +2908,9 @@
                 const sentimentResults = analyzeSentiment(posts, llms);
                 displaySentiment(llms, sentimentResults);
                 
-                // Extract and display sentiment sentences
-                const sentencesData = extractSentimentSentences(posts);
-                currentSentencesData = sentencesData; // Store for show more functionality
-                displaySentimentSentences(sentencesData);
+                // Extract and display common themes
+                const themesData = extractThemes(posts);
+                displayThemes(themesData);
             }
         }
 
@@ -3358,7 +3397,82 @@
             });
         }
 
-        // Negation words that flip sentiment
+        // Theme definitions for LLM usage feedback analysis
+        const FEEDBACK_THEMES = {
+            // Positive themes - what worked well
+            codeQuality: {
+                name: 'Code Quality',
+                icon: '💻',
+                description: 'Generated code that works correctly',
+                positiveKeywords: ['working', 'works', 'correct', 'accurate', 'fixed', 'solved', 'runs', 'compiled', 'passed', 'tests', 'bug-free', 'clean', 'elegant'],
+                negativeKeywords: ['broken', 'buggy', 'incorrect', 'wrong', 'error', 'crash', 'failed', 'bugs', 'syntax', 'compile']
+            },
+            explanations: {
+                name: 'Clear Explanations',
+                icon: '📖',
+                description: 'Quality of explanations and teaching',
+                positiveKeywords: ['explained', 'understand', 'clear', 'clarity', 'learned', 'taught', 'insight', 'intuitive', 'step-by-step', 'detailed', 'thorough', 'comprehensive'],
+                negativeKeywords: ['confusing', 'confused', 'unclear', 'vague', 'ambiguous', 'complicated', 'complex', 'hard to understand', 'misleading']
+            },
+            speed: {
+                name: 'Speed & Efficiency',
+                icon: '⚡',
+                description: 'Time saved and response speed',
+                positiveKeywords: ['fast', 'quick', 'efficient', 'saved time', 'productive', 'speed', 'rapid', 'instant', 'immediately'],
+                negativeKeywords: ['slow', 'took long', 'waited', 'delayed', 'wasted time', 'tedious', 'repetitive']
+            },
+            helpfulness: {
+                name: 'Helpfulness',
+                icon: '🤝',
+                description: 'Overall usefulness and assistance',
+                positiveKeywords: ['helpful', 'helped', 'useful', 'valuable', 'beneficial', 'assist', 'assisted', 'support', 'guided', 'guidance'],
+                negativeKeywords: ['unhelpful', 'useless', 'waste', 'pointless', 'no help', 'didn\'t help']
+            },
+            debugging: {
+                name: 'Debugging Help',
+                icon: '🔧',
+                description: 'Finding and fixing bugs',
+                positiveKeywords: ['debug', 'debugged', 'fixed', 'found bug', 'identified', 'traced', 'diagnosed', 'resolved', 'solution'],
+                negativeKeywords: ['couldn\'t find', 'missed', 'wrong diagnosis', 'misidentified', 'false positive']
+            },
+            learning: {
+                name: 'Learning Value',
+                icon: '🎓',
+                description: 'Educational benefit and understanding',
+                positiveKeywords: ['learned', 'learning', 'understand', 'understood', 'insight', 'educational', 'taught', 'knowledge', 'concepts', 'fundamentals'],
+                negativeKeywords: ['didn\'t learn', 'no understanding', 'just copied', 'memorized', 'dependency']
+            },
+            creativity: {
+                name: 'Creative Solutions',
+                icon: '💡',
+                description: 'Innovative approaches and ideas',
+                positiveKeywords: ['creative', 'innovative', 'clever', 'smart', 'brilliant', 'elegant', 'novel', 'alternative', 'approach', 'idea', 'suggestion'],
+                negativeKeywords: ['generic', 'basic', 'obvious', 'boring', 'standard', 'template']
+            },
+            accuracy: {
+                name: 'Accuracy & Reliability',
+                icon: '🎯',
+                description: 'Correctness and consistency of responses',
+                positiveKeywords: ['accurate', 'correct', 'reliable', 'consistent', 'precise', 'exact', 'right', 'true', 'valid'],
+                negativeKeywords: ['inaccurate', 'wrong', 'incorrect', 'hallucination', 'made up', 'false', 'unreliable', 'inconsistent', 'contradicted']
+            },
+            communication: {
+                name: 'Communication Style',
+                icon: '💬',
+                description: 'How the LLM communicates',
+                positiveKeywords: ['clear', 'concise', 'well-written', 'organized', 'structured', 'readable', 'articulate', 'polite', 'friendly'],
+                negativeKeywords: ['verbose', 'rambling', 'repetitive', 'wordy', 'long-winded', 'disorganized', 'rude']
+            },
+            problemSolving: {
+                name: 'Problem Solving',
+                icon: '🧩',
+                description: 'Ability to solve complex problems',
+                positiveKeywords: ['solved', 'solution', 'figured out', 'resolved', 'answered', 'addressed', 'tackled', 'overcame', 'breakthrough'],
+                negativeKeywords: ['couldn\'t solve', 'stuck', 'blocked', 'no solution', 'gave up', 'incomplete', 'partial']
+            }
+        };
+
+        // Negation words for context-aware analysis
         const NEGATION_WORDS = new Set([
             'not', 'no', 'never', 'neither', 'nobody', 'nothing', 'nowhere',
             'without', 'hardly', 'barely', 'scarcely', 'seldom', 'rarely',
@@ -3366,254 +3480,235 @@
             "shouldn't", "can't", "cannot", "isn't", "aren't", "wasn't", "weren't"
         ]);
 
-        // Transition words that indicate sentiment shift (what comes after matters more)
-        const CONTRAST_WORDS = new Set([
-            'but', 'however', 'although', 'though', 'yet', 'still', 'nevertheless',
-            'nonetheless', 'despite', 'instead', 'whereas', 'while', 'except',
-            'unfortunately', 'fortunately', 'finally', 'eventually', 'ultimately'
-        ]);
-
-        // Intensifier words that amplify sentiment
-        const INTENSIFIERS = new Set([
-            'very', 'really', 'extremely', 'incredibly', 'absolutely', 'completely',
-            'totally', 'highly', 'super', 'so', 'too', 'especially', 'particularly',
-            'remarkably', 'exceptionally', 'definitely', 'certainly', 'truly'
-        ]);
-
-        // Analyze sentiment of a single sentence with context awareness
-        function analyzeSentenceSentiment(sentence) {
-            const lowerSentence = sentence.toLowerCase();
-            const words = lowerSentence.replace(/[^a-z'\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+        // Extract common themes from posts
+        function extractThemes(posts) {
+            const themeResults = {};
             
-            let score = 0;
-            let positiveKeywords = [];
-            let negativeKeywords = [];
-            let isNegated = false;
-            let intensifierActive = false;
-            let afterContrast = false;
-            let contrastIndex = -1;
-            
-            // Find if there's a contrast word and where it is
-            for (let i = 0; i < words.length; i++) {
-                if (CONTRAST_WORDS.has(words[i])) {
-                    contrastIndex = i;
-                    afterContrast = true;
-                    break;
-                }
-            }
-            
-            // Process each word with context
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i];
-                const prevWord = i > 0 ? words[i - 1] : '';
-                const prevPrevWord = i > 1 ? words[i - 2] : '';
-                
-                // Check for negation in the previous 1-3 words
-                isNegated = NEGATION_WORDS.has(prevWord) || 
-                            NEGATION_WORDS.has(prevPrevWord) ||
-                            (i > 2 && NEGATION_WORDS.has(words[i - 3]));
-                
-                // Check for intensifier
-                intensifierActive = INTENSIFIERS.has(prevWord);
-                
-                // Calculate position weight: words after contrast get 2x weight
-                let positionWeight = 1;
-                if (afterContrast && i > contrastIndex) {
-                    positionWeight = 2;
-                } else if (afterContrast && i < contrastIndex) {
-                    positionWeight = 0.5; // Words before contrast get less weight
-                }
-                
-                // Apply intensifier multiplier
-                const intensifierMultiplier = intensifierActive ? 1.5 : 1;
-                
-                // Calculate word sentiment
-                let wordScore = 0;
-                if (POSITIVE_WORDS.has(word)) {
-                    if (isNegated) {
-                        wordScore = -1; // "not good" is negative
-                        negativeKeywords.push(`not ${word}`);
-                    } else {
-                        wordScore = 1;
-                        positiveKeywords.push(word);
-                    }
-                } else if (NEGATIVE_WORDS.has(word)) {
-                    if (isNegated) {
-                        wordScore = 0.7; // "not bad" is mildly positive
-                        positiveKeywords.push(`not ${word}`);
-                    } else {
-                        wordScore = -1;
-                        negativeKeywords.push(word);
-                    }
-                }
-                
-                // Apply weights
-                score += wordScore * positionWeight * intensifierMultiplier;
-            }
-            
-            // Determine final sentiment based on aggregated score
-            let sentiment = 'neutral';
-            let confidence = Math.abs(score);
-            
-            if (score > 0.5) {
-                sentiment = 'positive';
-            } else if (score < -0.5) {
-                sentiment = 'negative';
-            }
-            
-            return {
-                sentiment,
-                score,
-                confidence,
-                positiveKeywords: [...new Set(positiveKeywords)],
-                negativeKeywords: [...new Set(negativeKeywords)]
-            };
-        }
-
-        // Extract sentences with sentiment from posts
-        function extractSentimentSentences(posts) {
-            const positiveSentences = [];
-            const negativeSentences = [];
+            // Initialize theme tracking
+            Object.keys(FEEDBACK_THEMES).forEach(themeKey => {
+                themeResults[themeKey] = {
+                    ...FEEDBACK_THEMES[themeKey],
+                    positiveCount: 0,
+                    negativeCount: 0,
+                    positiveMentions: [],
+                    negativeMentions: [],
+                    exampleSentences: { positive: [], negative: [] }
+                };
+            });
             
             posts.forEach(post => {
                 const content = post.content || post.text || post.body || '';
                 const author = post.author || 'Unknown';
                 const llm = post.llm_agent || 'Unknown';
-                const postTitle = post.title || 'Untitled';
                 
-                // Strip HTML and split into sentences
-                const textOnly = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-                // Split by sentence-ending punctuation while keeping the punctuation
-                const sentences = textOnly.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 15);
+                // Strip HTML and normalize
+                const textOnly = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+                const sentences = content.replace(/<[^>]*>/g, ' ').split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 10);
                 
-                sentences.forEach(sentence => {
-                    // Analyze the entire sentence for aggregate sentiment
-                    const analysis = analyzeSentenceSentiment(sentence);
+                // Check each theme
+                Object.keys(FEEDBACK_THEMES).forEach(themeKey => {
+                    const theme = FEEDBACK_THEMES[themeKey];
                     
-                    // Only include sentences with clear sentiment (confidence threshold)
-                    if (analysis.sentiment === 'positive' && analysis.confidence >= 0.5) {
-                        positiveSentences.push({
-                            text: sentence.trim(),
-                            author: author,
-                            llm: llm,
-                            title: postTitle,
-                            keywords: analysis.positiveKeywords.slice(0, 4),
-                            score: analysis.score,
-                            confidence: analysis.confidence
-                        });
-                    } else if (analysis.sentiment === 'negative' && analysis.confidence >= 0.5) {
-                        negativeSentences.push({
-                            text: sentence.trim(),
-                            author: author,
-                            llm: llm,
-                            title: postTitle,
-                            keywords: analysis.negativeKeywords.slice(0, 4),
-                            score: Math.abs(analysis.score),
-                            confidence: analysis.confidence
-                        });
-                    }
+                    // Check for positive keywords
+                    theme.positiveKeywords.forEach(keyword => {
+                        const keywordLower = keyword.toLowerCase();
+                        const regex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                        const matches = textOnly.match(regex);
+                        
+                        if (matches) {
+                            // Check if negated
+                            const isNegated = checkNegation(textOnly, keywordLower);
+                            
+                            if (!isNegated) {
+                                themeResults[themeKey].positiveCount += matches.length;
+                                themeResults[themeKey].positiveMentions.push(keyword);
+                                
+                                // Find example sentence
+                                const exampleSentence = findSentenceWithKeyword(sentences, keyword);
+                                if (exampleSentence && themeResults[themeKey].exampleSentences.positive.length < 3) {
+                                    themeResults[themeKey].exampleSentences.positive.push({
+                                        text: exampleSentence,
+                                        author: author,
+                                        llm: llm
+                                    });
+                                }
+                            } else {
+                                // Negated positive = negative sentiment
+                                themeResults[themeKey].negativeCount += matches.length;
+                                themeResults[themeKey].negativeMentions.push(`not ${keyword}`);
+                            }
+                        }
+                    });
+                    
+                    // Check for negative keywords
+                    theme.negativeKeywords.forEach(keyword => {
+                        const keywordLower = keyword.toLowerCase();
+                        const regex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                        const matches = textOnly.match(regex);
+                        
+                        if (matches) {
+                            // Check if negated
+                            const isNegated = checkNegation(textOnly, keywordLower);
+                            
+                            if (!isNegated) {
+                                themeResults[themeKey].negativeCount += matches.length;
+                                themeResults[themeKey].negativeMentions.push(keyword);
+                                
+                                // Find example sentence
+                                const exampleSentence = findSentenceWithKeyword(sentences, keyword);
+                                if (exampleSentence && themeResults[themeKey].exampleSentences.negative.length < 3) {
+                                    themeResults[themeKey].exampleSentences.negative.push({
+                                        text: exampleSentence,
+                                        author: author,
+                                        llm: llm
+                                    });
+                                }
+                            } else {
+                                // Negated negative = positive sentiment
+                                themeResults[themeKey].positiveCount += matches.length;
+                                themeResults[themeKey].positiveMentions.push(`not ${keyword}`);
+                            }
+                        }
+                    });
                 });
             });
             
-            // Sort by confidence/score (strongest sentiment first)
-            positiveSentences.sort((a, b) => b.confidence - a.confidence);
-            negativeSentences.sort((a, b) => b.confidence - a.confidence);
+            // Aggregate results into positive and negative themes
+            const positiveThemes = [];
+            const negativeThemes = [];
             
-            return {
-                positive: positiveSentences,
-                negative: negativeSentences
-            };
+            Object.keys(themeResults).forEach(themeKey => {
+                const theme = themeResults[themeKey];
+                const netScore = theme.positiveCount - theme.negativeCount;
+                
+                // Calculate relative strength (for progress bar)
+                const totalMentions = theme.positiveCount + theme.negativeCount;
+                
+                if (theme.positiveCount > 0 && netScore > 0) {
+                    positiveThemes.push({
+                        key: themeKey,
+                        name: theme.name,
+                        icon: theme.icon,
+                        description: theme.description,
+                        count: theme.positiveCount,
+                        totalMentions: totalMentions,
+                        keywords: [...new Set(theme.positiveMentions)].slice(0, 5),
+                        examples: theme.exampleSentences.positive,
+                        strength: totalMentions > 0 ? (theme.positiveCount / totalMentions) : 0
+                    });
+                }
+                
+                if (theme.negativeCount > 0 && netScore <= 0) {
+                    negativeThemes.push({
+                        key: themeKey,
+                        name: theme.name,
+                        icon: theme.icon,
+                        description: theme.description,
+                        count: theme.negativeCount,
+                        totalMentions: totalMentions,
+                        keywords: [...new Set(theme.negativeMentions)].slice(0, 5),
+                        examples: theme.exampleSentences.negative,
+                        strength: totalMentions > 0 ? (theme.negativeCount / totalMentions) : 0
+                    });
+                }
+            });
+            
+            // Sort by mention count
+            positiveThemes.sort((a, b) => b.count - a.count);
+            negativeThemes.sort((a, b) => b.count - a.count);
+            
+            return { positive: positiveThemes, negative: negativeThemes };
         }
 
-        // Display sentiment sentences
-        function displaySentimentSentences(sentencesData) {
-            const positiveList = document.getElementById('positiveSentencesList');
-            const negativeList = document.getElementById('negativeSentencesList');
-            const positiveCount = document.getElementById('positiveCount');
-            const negativeCount = document.getElementById('negativeCount');
+        // Check if a keyword is negated in context
+        function checkNegation(text, keyword) {
+            const keywordIndex = text.indexOf(keyword);
+            if (keywordIndex === -1) return false;
+            
+            // Check previous 30 characters for negation words
+            const prefix = text.substring(Math.max(0, keywordIndex - 30), keywordIndex);
+            const prefixWords = prefix.split(/\s+/);
+            
+            return prefixWords.some(word => NEGATION_WORDS.has(word.replace(/[^a-z']/g, '')));
+        }
+
+        // Find a sentence containing a keyword
+        function findSentenceWithKeyword(sentences, keyword) {
+            const keywordLower = keyword.toLowerCase();
+            for (const sentence of sentences) {
+                if (sentence.toLowerCase().includes(keywordLower)) {
+                    // Return truncated if too long
+                    const trimmed = sentence.trim();
+                    return trimmed.length > 150 ? trimmed.substring(0, 150) + '...' : trimmed;
+                }
+            }
+            return null;
+        }
+
+        // Display themes
+        function displayThemes(themesData) {
+            const positiveList = document.getElementById('positiveThemesList');
+            const negativeList = document.getElementById('negativeThemesList');
+            const positiveCount = document.getElementById('positiveThemesCount');
+            const negativeCount = document.getElementById('negativeThemesCount');
             
             // Update counts
-            positiveCount.textContent = `${sentencesData.positive.length} found`;
-            negativeCount.textContent = `${sentencesData.negative.length} found`;
+            positiveCount.textContent = `${themesData.positive.length} themes`;
+            negativeCount.textContent = `${themesData.negative.length} themes`;
             
-            // Display positive sentences
-            if (sentencesData.positive.length === 0) {
+            // Display positive themes
+            if (themesData.positive.length === 0) {
                 positiveList.innerHTML = `
-                    <div class="sentences-empty">
-                        <div class="emoji">🤔</div>
-                        <p>No distinctly positive sentences found in the filtered posts</p>
+                    <div class="themes-empty">
+                        <div class="emoji">🔍</div>
+                        <p>No distinct positive themes found in the filtered posts</p>
                     </div>
                 `;
             } else {
-                const initialShow = 5;
-                const positivesToShow = sentencesData.positive.slice(0, initialShow);
-                
-                positiveList.innerHTML = positivesToShow.map(s => createSentenceItem(s, 'positive')).join('');
-                
-                if (sentencesData.positive.length > initialShow) {
-                    positiveList.innerHTML += `
-                        <button class="show-more-btn" onclick="showMoreSentences('positive')">
-                            Show ${sentencesData.positive.length - initialShow} more positive sentences
-                        </button>
-                    `;
-                }
+                positiveList.innerHTML = themesData.positive.map(theme => createThemeCard(theme, 'positive')).join('');
             }
             
-            // Display negative sentences
-            if (sentencesData.negative.length === 0) {
+            // Display negative themes
+            if (themesData.negative.length === 0) {
                 negativeList.innerHTML = `
-                    <div class="sentences-empty">
-                        <div class="emoji">😊</div>
-                        <p>No distinctly negative sentences found in the filtered posts</p>
+                    <div class="themes-empty">
+                        <div class="emoji">✨</div>
+                        <p>No significant challenges reported in the filtered posts</p>
                     </div>
                 `;
             } else {
-                const initialShow = 5;
-                const negativesToShow = sentencesData.negative.slice(0, initialShow);
-                
-                negativeList.innerHTML = negativesToShow.map(s => createSentenceItem(s, 'negative')).join('');
-                
-                if (sentencesData.negative.length > initialShow) {
-                    negativeList.innerHTML += `
-                        <button class="show-more-btn" onclick="showMoreSentences('negative')">
-                            Show ${sentencesData.negative.length - initialShow} more negative sentences
-                        </button>
-                    `;
-                }
+                negativeList.innerHTML = themesData.negative.map(theme => createThemeCard(theme, 'negative')).join('');
             }
         }
 
-        // Create a sentence item element
-        function createSentenceItem(sentence, type) {
-            // Escape HTML in the text
-            const escapedText = sentence.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const truncatedText = escapedText.length > 250 ? escapedText.substring(0, 250) + '...' : escapedText;
+        // Create a theme card element
+        function createThemeCard(theme, type) {
+            const strengthPercent = Math.round(theme.strength * 100);
+            const example = theme.examples[0];
+            const exampleHtml = example ? `
+                <div class="theme-example">
+                    ${example.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                </div>
+            ` : '';
             
             return `
-                <div class="sentence-item ${type}">
-                    <div class="sentence-text">"${truncatedText}"</div>
-                    <div class="sentence-meta">
-                        <span class="author-tag">
-                            👤 ${sentence.author}
-                        </span>
-                        <span class="keywords">
-                            ${sentence.keywords.map(k => `<span class="keyword">${k}</span>`).join('')}
-                        </span>
+                <div class="theme-card ${type}">
+                    <div class="theme-card-header">
+                        <span class="theme-icon">${theme.icon}</span>
+                        <span class="theme-name">${theme.name}</span>
+                        <span class="mention-count">${theme.count} mentions</span>
+                    </div>
+                    <div class="theme-description">${theme.description}</div>
+                    <div class="theme-keywords">
+                        ${theme.keywords.map(k => `<span class="theme-keyword">${k}</span>`).join('')}
+                    </div>
+                    ${exampleHtml}
+                    <div class="theme-progress-bar">
+                        <div class="theme-progress-fill" style="width: ${strengthPercent}%"></div>
                     </div>
                 </div>
             `;
         }
-
-        // Show more sentences
-        function showMoreSentences(type) {
-            const listId = type === 'positive' ? 'positiveSentencesList' : 'negativeSentencesList';
-            const list = document.getElementById(listId);
-            const sentences = type === 'positive' ? currentSentencesData.positive : currentSentencesData.negative;
-            list.innerHTML = sentences.map(s => createSentenceItem(s, type)).join('');
-        }
-
-        // Store sentences data globally for show more functionality
-        let currentSentencesData = { positive: [], negative: [] };
     </script>
 </body>
 </html>
